@@ -1,0 +1,49 @@
+{
+  "name": "@optalysys-/testnet-battleships",
+  "description": "Multi-user Battleships guessing game",
+  "version": "0.0.1-rc1",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "main": "hardhat.config.ts",
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@fhevm/hardhat-plugin": "^0.1.0",
+    "@fhevm/solidity": "^0.8.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
+    "@nomicfoundation/hardhat-ethers": "^3.1.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^5.2.3",
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/prompt-sync": "^4.2.0",
+    "@zama-fhe/oracle-solidity": "^0.2.0",
+    "@zama-fhe/relayer-sdk": "^0.2.0",
+    "chai": "^4.5.0",
+    "encrypted-types": "^0.0.4",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.26.0",
+    "prompt-sync": "^4.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "compile": "hardhat compile",
+    "prettier:check": "prettier --check \"**/*.{js,json,md,sol,ts,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
+    "test": "NETWORK=optalysys hardhat test",
+    "test-localhost": "hardhat test",
+    "build:ts": "tsc --project tsconfig.json",
+    "typechain": "TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
+    "start-localhost": "hardhat node"
+  },
+  "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bigint-buffer",
+      "protobufjs"
+    ]
+  }
+}

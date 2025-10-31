@@ -1,0 +1,12 @@
+{
+    "gateway_chain_id": "678259798",
+    "input_verification_contract_address": "0x7048C39f048125eDa9d678AEbaDfB22F7900a29F",
+    "decryption_contract_address": "0xb6E160B1ff80D67Bfe90A85eE06Ce0A2613607D1",
+    "acl_contract_address": "0x50157cffd6bbfa2dece204a89ec419c23ef5755d",
+    "fhevm_executor_contract_address": "0xcd3ab3bd6bcc0c0bf3e27912a92043e817b1cf69",
+    "kms_verifier_contract_address": "0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC",
+    "decryption_oracle_contract_address": "0xa02Cda4Ca3a71D7C46997716F4283aa851C28812",
+    "input_verifier_contract_address": "0xbc91f3daD1A5F19F8390c400196e58073B6a0BC4",
+    "json_rpc_url": "http://127.0.0.1:8545",
+    "relayer_url": "http://127.0.0.1:8545"
+}
