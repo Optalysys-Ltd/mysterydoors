@@ -14,10 +14,15 @@ type Signers = {
   bob: HardhatEthersSigner;
 };
 
+type Coord = {
+  x: number;
+  y: number;
+};
+
 const MAX_GUESSES = 5;
 
 async function deployFixture() {
-  const initShipPositions: Battleships.CoordStruct[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
+  const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
   const keyFile = "key.json";
   const networkName = process.env.NETWORK || "hardhat";
   let wallet: HDNodeWallet;
@@ -70,7 +75,6 @@ async function deployFixture() {
     ethers.getAddress(testnetConfig.fhevmExecutorContractAddress),
     ethers.getAddress(testnetConfig.kmsVerifierContractAddress),
     ethers.getAddress(testnetConfig.decryptionOracleContractAddress),
-    initShipPositions
   );
   timestampLog("Waiting for deployment...")
   const receipt = await (await battleshipsContract.waitForDeployment()).deploymentTransaction()?.wait()
@@ -78,6 +82,15 @@ async function deployFixture() {
   const battleshipsContractAddress = receipt?.contractAddress as string;
   timestampLog("Contract address: " + battleshipsContractAddress)
 
+  for (let i = 0; i < initShipPositions.length; i++) {
+    const initShipPosition = initShipPositions[i];
+    const input = fhevm.createEncryptedInput(battleshipsContractAddress, walletAddress);
+    input.add8(initShipPosition.x); // x: at index 0
+    input.add8(initShipPosition.y); // y: at index 1
+    const encryptedInput = await input.encrypt();
+    await battleshipsContract.placeShip(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+  }
+  await battleshipsContract.startGame();
 
   return { battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm };
 }
@@ -170,6 +183,7 @@ describe("Battleships", function () {
   });
 
   it("Only MAX_GUESSES guesses are allowed", async () => {
+    await battleshipsContract.connect(signers.alice).joinGame();
     for (let i = 1; i <= MAX_GUESSES; i++) {
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
       input.add8(i); // x: at index 0
@@ -183,6 +197,7 @@ describe("Battleships", function () {
   });
 
   it("Player should be able to decrypt their guesses", async () => {
+    await battleshipsContract.connect(signers.alice).joinGame();
     for (let i = 1; i <= 3; i++) {
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
       input.add8(i); // x: at index 0
@@ -211,6 +226,8 @@ describe("Battleships", function () {
       { x: 20, y: 20, expectedCorrectGuesses: 1 },
       { x: 3, y: 3, expectedCorrectGuesses: 2 },
     ]
+    await battleshipsContract.connect(signers.alice).joinGame();
+
     for (let i = 0; i < turns.length; i++) {
       const turn = turns[i];
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
@@ -222,6 +239,6 @@ describe("Battleships", function () {
       const correctGuesses = await fhevm.userDecryptEuint(FhevmType.euint8, eCorrectGuesses, battleshipsContractAddress, signers.alice);
       expect(correctGuesses).to.eq(turn.expectedCorrectGuesses);
     }
-    
+
   });
 });

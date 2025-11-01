@@ -24,13 +24,6 @@ import type {
 } from "../common";
 
 export declare namespace Battleships {
-  export type CoordStruct = { x: BigNumberish; y: BigNumberish };
-
-  export type CoordStructOutput = [x: bigint, y: bigint] & {
-    x: bigint;
-    y: bigint;
-  };
-
   export type ECoordStruct = { x: BytesLike; y: BytesLike };
 
   export type ECoordStructOutput = [x: string, y: string] & {
@@ -43,15 +36,21 @@ export interface BattleshipsInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "MAX_GUESSES"
+      | "MAX_PLAYERS"
       | "acceptOwnership"
       | "addGuess"
+      | "decryptedShipPositions"
       | "endGame"
       | "gameOver"
       | "gameStarted"
       | "getCorrectGuesses"
       | "getGuesses"
+      | "joinGame"
+      | "numPlayers"
       | "owner"
       | "pendingOwner"
+      | "placeShip"
+      | "players"
       | "renounceOwnership"
       | "startGame"
       | "transferOwnership"
@@ -66,12 +65,20 @@ export interface BattleshipsInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "MAX_PLAYERS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "acceptOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "addGuess",
     values: [BytesLike, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "decryptedShipPositions",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "endGame", values?: undefined): string;
   encodeFunctionData(functionFragment: "gameOver", values?: undefined): string;
@@ -87,10 +94,23 @@ export interface BattleshipsInterface extends Interface {
     functionFragment: "getGuesses",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "joinGame", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "numPlayers",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "pendingOwner",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "placeShip",
+    values: [BytesLike, BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "players",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -107,10 +127,18 @@ export interface BattleshipsInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "MAX_PLAYERS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "acceptOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "addGuess", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "decryptedShipPositions",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "endGame", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "gameOver", data: BytesLike): Result;
   decodeFunctionResult(
@@ -122,11 +150,15 @@ export interface BattleshipsInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getGuesses", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "joinGame", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "numPlayers", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingOwner",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "placeShip", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "players", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -209,12 +241,20 @@ export interface Battleships extends BaseContract {
 
   MAX_GUESSES: TypedContractMethod<[], [bigint], "view">;
 
+  MAX_PLAYERS: TypedContractMethod<[], [bigint], "view">;
+
   acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   addGuess: TypedContractMethod<
     [eX: BytesLike, eY: BytesLike, inputProof: BytesLike],
     [void],
     "nonpayable"
+  >;
+
+  decryptedShipPositions: TypedContractMethod<
+    [arg0: BigNumberish],
+    [[bigint, bigint] & { x: bigint; y: bigint }],
+    "view"
   >;
 
   endGame: TypedContractMethod<[], [void], "nonpayable">;
@@ -231,9 +271,21 @@ export interface Battleships extends BaseContract {
     "view"
   >;
 
+  joinGame: TypedContractMethod<[], [void], "nonpayable">;
+
+  numPlayers: TypedContractMethod<[], [bigint], "view">;
+
   owner: TypedContractMethod<[], [string], "view">;
 
   pendingOwner: TypedContractMethod<[], [string], "view">;
+
+  placeShip: TypedContractMethod<
+    [eX: BytesLike, eY: BytesLike, inputProof: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+
+  players: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
@@ -253,6 +305,9 @@ export interface Battleships extends BaseContract {
     nameOrSignature: "MAX_GUESSES"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "MAX_PLAYERS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "acceptOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -261,6 +316,13 @@ export interface Battleships extends BaseContract {
     [eX: BytesLike, eY: BytesLike, inputProof: BytesLike],
     [void],
     "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "decryptedShipPositions"
+  ): TypedContractMethod<
+    [arg0: BigNumberish],
+    [[bigint, bigint] & { x: bigint; y: bigint }],
+    "view"
   >;
   getFunction(
     nameOrSignature: "endGame"
@@ -278,11 +340,27 @@ export interface Battleships extends BaseContract {
     nameOrSignature: "getGuesses"
   ): TypedContractMethod<[], [Battleships.ECoordStructOutput[]], "view">;
   getFunction(
+    nameOrSignature: "joinGame"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "numPlayers"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "pendingOwner"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "placeShip"
+  ): TypedContractMethod<
+    [eX: BytesLike, eY: BytesLike, inputProof: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "players"
+  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
