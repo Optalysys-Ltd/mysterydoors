@@ -20,6 +20,9 @@ importers:
       '@nomicfoundation/hardhat-ethers':
         specifier: ^3.1.0
         version: 3.1.0(ethers@6.15.0)(hardhat@2.26.3(ts-node@10.9.2(@types/node@22.7.5)(typescript@5.9.3))(typescript@5.9.3))
+      '@openzeppelin/contracts':
+        specifier: ^5.4.0
+        version: 5.4.0
       '@typechain/ethers-v6':
         specifier: ^0.5.1
         version: 0.5.1(ethers@6.15.0)(typechain@8.3.2(typescript@5.9.3))(typescript@5.9.3)
@@ -495,6 +498,9 @@ packages:
 
   '@openzeppelin/contracts@5.1.0':
     resolution: {integrity: sha512-p1ULhl7BXzjjbha5aqst+QMLY+4/LCWADXOCsmLHRM77AqiPjnd9vvUN9sosUfhL9JGKpZ0TjEGxgvnizmWGSA==}
+
+  '@openzeppelin/contracts@5.4.0':
+    resolution: {integrity: sha512-eCYgWnLg6WO+X52I16TZt8uEjbtdkgLC0SUX/xnAksjjrQI4Xfn4iBRoI5j55dmlOhDv1Y7BoR3cU7e3WWhC6A==}
 
   '@openzeppelin/defender-deploy-client-cli@0.0.1-alpha.10':
     resolution: {integrity: sha512-piZnEbGZle6I4L0XsnD4Is73pps16Zx1wakXrZeDH7vPyVzIr/1Gb0hKflj+ffVHlNR8MrAs1BSw4Z99wGkzfg==}
@@ -3192,6 +3198,8 @@ snapshots:
       '@openzeppelin/contracts': 5.1.0
 
   '@openzeppelin/contracts@5.1.0': {}
+
+  '@openzeppelin/contracts@5.4.0': {}
 
   '@openzeppelin/defender-deploy-client-cli@0.0.1-alpha.10':
     dependencies:

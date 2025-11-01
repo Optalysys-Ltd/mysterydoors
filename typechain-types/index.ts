@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as fhevm from "./@fhevm";
 export type { fhevm };
+import type * as openzeppelin from "./@openzeppelin";
+export type { openzeppelin };
 import type * as contracts from "./contracts";
 export type { contracts };
 export * as factories from "./factories";
@@ -18,7 +20,13 @@ export type { IFHEVMExecutor } from "./@fhevm/solidity/lib/Impl.sol/IFHEVMExecut
 export { IFHEVMExecutor__factory } from "./factories/@fhevm/solidity/lib/Impl.sol/IFHEVMExecutor__factory";
 export type { IInputVerifier } from "./@fhevm/solidity/lib/Impl.sol/IInputVerifier";
 export { IInputVerifier__factory } from "./factories/@fhevm/solidity/lib/Impl.sol/IInputVerifier__factory";
+export type { Ownable } from "./@openzeppelin/contracts/access/Ownable";
+export { Ownable__factory } from "./factories/@openzeppelin/contracts/access/Ownable__factory";
+export type { Ownable2Step } from "./@openzeppelin/contracts/access/Ownable2Step";
+export { Ownable2Step__factory } from "./factories/@openzeppelin/contracts/access/Ownable2Step__factory";
+export type { Battleships } from "./contracts/Battleships.sol/Battleships";
+export { Battleships__factory } from "./factories/contracts/Battleships.sol/Battleships__factory";
+export type { Test } from "./contracts/Battleships.sol/Test";
+export { Test__factory } from "./factories/contracts/Battleships.sol/Test__factory";
 export type { FHECounter } from "./contracts/FHECounter";
 export { FHECounter__factory } from "./factories/contracts/FHECounter__factory";
-export type { Test } from "./contracts/Simple.sol/Test";
-export { Test__factory } from "./factories/contracts/Simple.sol/Test__factory";
