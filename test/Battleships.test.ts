@@ -6,13 +6,15 @@ import { createInstance, loadTestnetConfig, loadWallet, timestampLog } from "../
 import { JsonRpcProvider, HDNodeWallet, Signer } from "ethers";
 import { FhevmInstance } from "@zama-fhe/relayer-sdk/node";
 import { HardhatFhevmRuntimeEnvironment, FhevmType } from "@fhevm/hardhat-plugin";
-import {Battleships, Battleships__factory} from "../typechain-types";
+import { Battleships, Battleships__factory } from "../typechain-types";
 
 type Signers = {
   deployer: HardhatEthersSigner;
   alice: HardhatEthersSigner;
   bob: HardhatEthersSigner;
 };
+
+const MAX_GUESSES = 5;
 
 async function deployFixture() {
   const initShipPositions: Battleships.CoordStruct[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
@@ -148,16 +150,78 @@ describe("Battleships", function () {
   before(async function () {
     const ethSigners: HardhatEthersSigner[] = await ethers.getSigners();
     signers = { deployer: ethSigners[0], alice: ethSigners[1], bob: ethSigners[2] };
-    console.log("Alice address: "+signers.alice.address);
+    console.log("Alice address: " + signers.alice.address);
   });
 
   beforeEach(async () => {
     ({ battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm } = await deployFixture());
   });
 
-  it("Only deployer can end the game", async ()=> {
+  it("Only deployer can end the game", async () => {
     await expect(battleshipsContract.connect(signers.alice).endGame()).to.be.reverted;
     await expect(battleshipsContract.connect(signers.bob).endGame()).to.be.reverted;
     await expect(battleshipsContract.connect(signers.deployer).endGame()).to.not.be.reverted;
+  });
+
+  it("Only deployer can start the game", async () => {
+    await expect(battleshipsContract.connect(signers.alice).startGame()).to.be.reverted;
+    await expect(battleshipsContract.connect(signers.bob).startGame()).to.be.reverted;
+    await expect(battleshipsContract.connect(signers.deployer).startGame()).to.not.be.reverted;
+  });
+
+  it("Only MAX_GUESSES guesses are allowed", async () => {
+    for (let i = 1; i <= MAX_GUESSES; i++) {
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
+      input.add8(i); // x: at index 0
+      input.add8(i); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await expect(battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof)).to.not.be.reverted;
+      if (i === MAX_GUESSES) {
+        await expect(battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof)).to.be.revertedWith("You are out of guesses!");
+      }
+    }
+  });
+
+  it("Player should be able to decrypt their guesses", async () => {
+    for (let i = 1; i <= 3; i++) {
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
+      input.add8(i); // x: at index 0
+      input.add8(i); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+    }
+    const playerGuesses = await battleshipsContract.connect(signers.alice).getGuesses();
+    for (let i = 0; i < playerGuesses.length; i++) {
+      const decryptedX = await fhevm.userDecryptEuint(FhevmType.euint8, playerGuesses[i].x, battleshipsContractAddress, signers.alice);
+      expect(decryptedX).to.eq(i + 1);
+      const decryptedY = await fhevm.userDecryptEuint(FhevmType.euint8, playerGuesses[i].x, battleshipsContractAddress, signers.alice);
+      expect(decryptedY).to.eq(i + 1);
+    }
+  });
+
+  it("Player should be able to decrypt the number of correct guesses after every turn", async () => {
+    type Turn = {
+      x: number;
+      y: number;
+      expectedCorrectGuesses: number;
+    }
+    const turns: Turn[] = [
+      { x: 10, y: 10, expectedCorrectGuesses: 0 },
+      { x: 1, y: 1, expectedCorrectGuesses: 1 },
+      { x: 20, y: 20, expectedCorrectGuesses: 1 },
+      { x: 3, y: 3, expectedCorrectGuesses: 2 },
+    ]
+    for (let i = 0; i < turns.length; i++) {
+      const turn = turns[i];
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
+      input.add8(turn.x); // x: at index 0
+      input.add8(turn.y); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+      const eCorrectGuesses = await battleshipsContract.connect(signers.alice).getCorrectGuesses();
+      const correctGuesses = await fhevm.userDecryptEuint(FhevmType.euint8, eCorrectGuesses, battleshipsContractAddress, signers.alice);
+      expect(correctGuesses).to.eq(turn.expectedCorrectGuesses);
+    }
+    
   });
 });

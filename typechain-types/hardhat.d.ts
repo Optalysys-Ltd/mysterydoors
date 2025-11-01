@@ -50,10 +50,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Battleships__factory>;
     getContractFactory(
-      name: "Test",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Test__factory>;
-    getContractFactory(
       name: "FHECounter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FHECounter__factory>;
@@ -108,11 +104,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Battleships>;
     getContractAt(
-      name: "Test",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Test>;
-    getContractAt(
       name: "FHECounter",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -159,10 +150,6 @@ declare module "hardhat/types/runtime" {
       name: "Battleships",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Battleships>;
-    deployContract(
-      name: "Test",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Test>;
     deployContract(
       name: "FHECounter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -217,11 +204,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Battleships>;
-    deployContract(
-      name: "Test",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Test>;
     deployContract(
       name: "FHECounter",
       args: any[],
