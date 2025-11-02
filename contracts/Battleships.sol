@@ -17,7 +17,9 @@ contract Battleships is Ownable2Step {
     uint8 public MAX_GUESSES = 5;
     uint8 public MAX_PLAYERS = 20;
     uint public numPlayers;
-    mapping(address => string) public players;
+    mapping(address => string) public playerNames;
+    address[] public playersList;
+    euint8[] public ePlayerCorrectGuessesList;
     /// @notice Constant for zero using TFHE.
     /// @dev    Since it is expensive to compute 0, it is stored instead.
     euint8 private immutable _EUINT8_ZERO;
@@ -28,7 +30,6 @@ contract Battleships is Ownable2Step {
     ECoord[] private shipPositions;
     mapping(address => ECoord[]) private playerGuesses;
     mapping(address => euint8) private playerCorrectGuesses;
-    mapping(address => uint8) private decryptedPlayerCorrectGuesses;
 
     constructor(
         address aclAdd,
@@ -50,8 +51,17 @@ contract Battleships is Ownable2Step {
         FHE.allowThis(_EUINT8_ONE);
     }
 
-    function endGame() public onlyOwner {
+    function endGame() external onlyOwner {
         gameOver = true;
+        address[] memory players = playersList;
+        ePlayerCorrectGuessesList = new euint8[](players.length);
+        for (uint256 i = 0; i < players.length; i++) {
+            ePlayerCorrectGuessesList[i] = playerCorrectGuesses[players[i]];
+        }
+    }
+
+    function getPlayersCorrectGuesses() public view returns (address[] memory, euint8[] memory) {
+        return (playersList, ePlayerCorrectGuessesList);
     }
 
     function startGame() public onlyOwner {
@@ -62,10 +72,11 @@ contract Battleships is Ownable2Step {
 
     function joinGame(string calldata name) public {
         require(
-            numPlayers< MAX_PLAYERS,
+            numPlayers < MAX_PLAYERS,
             "The game is full. Please try again later."
         );
-        players[msg.sender] = name;
+        playerNames[msg.sender] = name;
+        playersList.push(msg.sender);
         numPlayers++;
     }
 
@@ -74,7 +85,10 @@ contract Battleships is Ownable2Step {
         externalEuint8 eY,
         bytes calldata inputProof
     ) public onlyOwner {
-        require(!gameStarted, "Ships can only be placed before the game starts");
+        require(
+            !gameStarted,
+            "Ships can only be placed before the game starts"
+        );
         euint8 x = FHE.fromExternal(eX, inputProof);
         FHE.allowThis(x);
 
@@ -90,7 +104,10 @@ contract Battleships is Ownable2Step {
     ) public {
         require(gameStarted, "The game has not started yet.");
         require(!gameOver, "The game is over.");
-        require(bytes(players[msg.sender]).length > 0, "You have not joined the game!");
+        require(
+            bytes(playerNames[msg.sender]).length > 0,
+            "You have not joined the game!"
+        );
         ECoord[] storage existingPlayerGuesses = playerGuesses[msg.sender];
         uint256 numGuesses = existingPlayerGuesses.length;
         require(numGuesses < MAX_GUESSES, "You are out of guesses!");
@@ -118,6 +135,7 @@ contract Battleships is Ownable2Step {
             );
             FHE.allowThis(playerCorrectGuesses[msg.sender]);
             FHE.allow(playerCorrectGuesses[msg.sender], msg.sender);
+            FHE.makePubliclyDecryptable(playerCorrectGuesses[msg.sender]);
         }
     }
 
@@ -128,5 +146,5 @@ contract Battleships is Ownable2Step {
     function getCorrectGuesses() public view returns (euint8) {
         return playerCorrectGuesses[msg.sender];
     }
-    
+
 }

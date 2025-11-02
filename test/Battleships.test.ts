@@ -157,7 +157,7 @@ describe("Battleships", function () {
 
   beforeEach(async () => {
     ({ battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm } = await deployFixture());
-    const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
+    const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }];
     for (let i = 0; i < initShipPositions.length; i++) {
       const initShipPosition = initShipPositions[i];
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, walletAddress);
@@ -222,6 +222,7 @@ describe("Battleships", function () {
       { x: 1, y: 1, expectedCorrectGuesses: 1 },
       { x: 20, y: 20, expectedCorrectGuesses: 1 },
       { x: 3, y: 3, expectedCorrectGuesses: 2 },
+      { x: 4, y: 4, expectedCorrectGuesses: 3 },
     ]
     await battleshipsContract.connect(signers.alice).joinGame("Alice");
 
@@ -237,6 +238,70 @@ describe("Battleships", function () {
       expect(correctGuesses).to.eq(turn.expectedCorrectGuesses);
     }
 
+  });
+
+  it("Multi players", async () => {
+    type Turn = {
+      x: number;
+      y: number;
+      expectedCorrectGuesses: number;
+    }
+    const aliceTurns: Turn[] = [
+      { x: 10, y: 10, expectedCorrectGuesses: 0 },
+      { x: 1, y: 1, expectedCorrectGuesses: 1 },
+      { x: 20, y: 20, expectedCorrectGuesses: 1 },
+      { x: 3, y: 3, expectedCorrectGuesses: 2 },
+      { x: 4, y: 4, expectedCorrectGuesses: 3 },
+    ]
+    await battleshipsContract.connect(signers.alice).joinGame("Alice");
+
+    for (let i = 0; i < aliceTurns.length; i++) {
+      const turn = aliceTurns[i];
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
+      input.add8(turn.x); // x: at index 0
+      input.add8(turn.y); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+      const eCorrectGuesses = await battleshipsContract.connect(signers.alice).getCorrectGuesses();
+      const correctGuesses = await fhevm.userDecryptEuint(FhevmType.euint8, eCorrectGuesses, battleshipsContractAddress, signers.alice);
+      expect(correctGuesses).to.eq(turn.expectedCorrectGuesses);
+    }
+
+    const bobTurns: Turn[] = [
+      { x: 6, y: 7, expectedCorrectGuesses: 0 },
+      { x: 5, y: 6, expectedCorrectGuesses: 0 },
+      { x: 4, y: 5, expectedCorrectGuesses: 0 },
+      { x: 4, y: 4, expectedCorrectGuesses: 1 },
+      { x: 3, y: 3, expectedCorrectGuesses: 2 },
+    ]
+    await battleshipsContract.connect(signers.bob).joinGame("Bob");
+
+    for (let i = 0; i < bobTurns.length; i++) {
+      const turn = bobTurns[i];
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.bob.address);
+      input.add8(turn.x); // x: at index 0
+      input.add8(turn.y); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await battleshipsContract.connect(signers.bob).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+      const eCorrectGuesses = await battleshipsContract.connect(signers.bob).getCorrectGuesses();
+      const correctGuesses = await fhevm.userDecryptEuint(FhevmType.euint8, eCorrectGuesses, battleshipsContractAddress, signers.bob);
+      expect(correctGuesses).to.eq(turn.expectedCorrectGuesses);
+    }
+
+    await battleshipsContract.connect(signers.deployer).endGame();
+    const [playersList, ePlayerCorrectGuessesList] = await battleshipsContract.connect(signers.deployer).getPlayersCorrectGuesses();
+    const result = await fhevm.publicDecrypt(ePlayerCorrectGuessesList);
+    timestampLog("Result:");
+    const playerNumCorrectGuesses: Record<string, bigint> = {};
+    let handleIndex = 0;
+    for (const key in result) {
+      console.log(key, result[key]);
+      playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint;
+      handleIndex++;
+    }
+    expect(Object.keys(playerNumCorrectGuesses).length).to.eq(playersList.length);
+    console.log(playerNumCorrectGuesses);
+    expect(true).to.eq(false);
   });
 });
 
