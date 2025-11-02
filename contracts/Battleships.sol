@@ -17,7 +17,7 @@ contract Battleships is Ownable2Step {
     uint8 public MAX_GUESSES = 5;
     uint8 public MAX_PLAYERS = 20;
     uint public numPlayers;
-    mapping(address => bool) public players;
+    mapping(address => string) public players;
     /// @notice Constant for zero using TFHE.
     /// @dev    Since it is expensive to compute 0, it is stored instead.
     euint8 private immutable _EUINT8_ZERO;
@@ -55,16 +55,17 @@ contract Battleships is Ownable2Step {
     }
 
     function startGame() public onlyOwner {
+        require(!gameStarted, "The game has already started.");
         gameStarted = true;
         gameOver = false;
     }
 
-    function joinGame() public {
+    function joinGame(string calldata name) public {
         require(
             numPlayers< MAX_PLAYERS,
             "The game is full. Please try again later."
         );
-        players[msg.sender] = true;
+        players[msg.sender] = name;
         numPlayers++;
     }
 
@@ -89,7 +90,7 @@ contract Battleships is Ownable2Step {
     ) public {
         require(gameStarted, "The game has not started yet.");
         require(!gameOver, "The game is over.");
-        require(players[msg.sender], "You are not in the game.");
+        require(bytes(players[msg.sender]).length > 0, "You have not joined the game!");
         ECoord[] storage existingPlayerGuesses = playerGuesses[msg.sender];
         uint256 numGuesses = existingPlayerGuesses.length;
         require(numGuesses < MAX_GUESSES, "You are out of guesses!");

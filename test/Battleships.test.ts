@@ -22,7 +22,6 @@ type Coord = {
 const MAX_GUESSES = 5;
 
 async function deployFixture() {
-  const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
   const keyFile = "key.json";
   const networkName = process.env.NETWORK || "hardhat";
   let wallet: HDNodeWallet;
@@ -81,16 +80,6 @@ async function deployFixture() {
   timestampLog("Contract deployed at block: " + receipt?.blockNumber);
   const battleshipsContractAddress = receipt?.contractAddress as string;
   timestampLog("Contract address: " + battleshipsContractAddress)
-
-  for (let i = 0; i < initShipPositions.length; i++) {
-    const initShipPosition = initShipPositions[i];
-    const input = fhevm.createEncryptedInput(battleshipsContractAddress, walletAddress);
-    input.add8(initShipPosition.x); // x: at index 0
-    input.add8(initShipPosition.y); // y: at index 1
-    const encryptedInput = await input.encrypt();
-    await battleshipsContract.placeShip(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
-  }
-  await battleshipsContract.startGame();
 
   return { battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm };
 }
@@ -168,22 +157,30 @@ describe("Battleships", function () {
 
   beforeEach(async () => {
     ({ battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm } = await deployFixture());
+    const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
+    for (let i = 0; i < initShipPositions.length; i++) {
+      const initShipPosition = initShipPositions[i];
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, walletAddress);
+      input.add8(initShipPosition.x); // x: at index 0
+      input.add8(initShipPosition.y); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await battleshipsContract.placeShip(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+    }
+    await battleshipsContract.startGame();
   });
 
-  it("Only deployer can end the game", async () => {
-    await expect(battleshipsContract.connect(signers.alice).endGame()).to.be.reverted;
-    await expect(battleshipsContract.connect(signers.bob).endGame()).to.be.reverted;
-    await expect(battleshipsContract.connect(signers.deployer).endGame()).to.not.be.reverted;
-  });
-
-  it("Only deployer can start the game", async () => {
-    await expect(battleshipsContract.connect(signers.alice).startGame()).to.be.reverted;
-    await expect(battleshipsContract.connect(signers.bob).startGame()).to.be.reverted;
-    await expect(battleshipsContract.connect(signers.deployer).startGame()).to.not.be.reverted;
+  it("Player needs to have joined the game", async () => {
+    const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
+    input.add8(0); // x: at index 0
+    input.add8(0); // y: at index 1
+    const encryptedInput = await input.encrypt();
+    await expect(battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof)).to.be.revertedWith("You have not joined the game!");
+    await battleshipsContract.connect(signers.alice).joinGame("Alice");
+    await expect(battleshipsContract.connect(signers.alice).addGuess(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof)).not.to.be.reverted;
   });
 
   it("Only MAX_GUESSES guesses are allowed", async () => {
-    await battleshipsContract.connect(signers.alice).joinGame();
+    await battleshipsContract.connect(signers.alice).joinGame("Alice");
     for (let i = 1; i <= MAX_GUESSES; i++) {
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
       input.add8(i); // x: at index 0
@@ -197,7 +194,7 @@ describe("Battleships", function () {
   });
 
   it("Player should be able to decrypt their guesses", async () => {
-    await battleshipsContract.connect(signers.alice).joinGame();
+    await battleshipsContract.connect(signers.alice).joinGame("Alice");
     for (let i = 1; i <= 3; i++) {
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, signers.alice.address);
       input.add8(i); // x: at index 0
@@ -226,7 +223,7 @@ describe("Battleships", function () {
       { x: 20, y: 20, expectedCorrectGuesses: 1 },
       { x: 3, y: 3, expectedCorrectGuesses: 2 },
     ]
-    await battleshipsContract.connect(signers.alice).joinGame();
+    await battleshipsContract.connect(signers.alice).joinGame("Alice");
 
     for (let i = 0; i < turns.length; i++) {
       const turn = turns[i];
@@ -241,4 +238,54 @@ describe("Battleships", function () {
     }
 
   });
+});
+
+describe("Battleships before game start", function () {
+  let signers: Signers;
+  let battleshipsContract: Battleships;
+  let battleshipsContractAddress: string;
+  let wallet: HDNodeWallet;
+  let fhevm: HardhatFhevmRuntimeEnvironment;
+  let walletAddress: string;
+
+
+  before(async function () {
+    const ethSigners: HardhatEthersSigner[] = await ethers.getSigners();
+    signers = { deployer: ethSigners[0], alice: ethSigners[1], bob: ethSigners[2] };
+    console.log("Alice address: " + signers.alice.address);
+  });
+
+  beforeEach(async () => {
+    ({ battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm } = await deployFixture());
+    const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }];
+    for (let i = 0; i < initShipPositions.length; i++) {
+      const initShipPosition = initShipPositions[i];
+      const input = fhevm.createEncryptedInput(battleshipsContractAddress, walletAddress);
+      input.add8(initShipPosition.x); // x: at index 0
+      input.add8(initShipPosition.y); // y: at index 1
+      const encryptedInput = await input.encrypt();
+      await battleshipsContract.placeShip(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof);
+    }
+  });
+
+  it("Only deployer can end the game", async () => {
+    await expect(battleshipsContract.connect(signers.alice).endGame()).to.be.reverted;
+    await expect(battleshipsContract.connect(signers.bob).endGame()).to.be.reverted;
+    await expect(battleshipsContract.connect(signers.deployer).endGame()).to.not.be.reverted;
+  });
+
+  it("Only deployer can start the game", async () => {
+    await expect(battleshipsContract.connect(signers.alice).startGame()).to.be.reverted;
+    await expect(battleshipsContract.connect(signers.bob).startGame()).to.be.reverted;
+    await expect(battleshipsContract.connect(signers.deployer).startGame()).to.not.be.reverted;
+  });
+
+  it("The game can only be started once", async () => {
+    await expect(battleshipsContract.connect(signers.deployer).startGame()).to.not.be.reverted;
+    await expect(battleshipsContract.connect(signers.deployer).startGame()).to.be.revertedWith("The game has already started.");
+
+  });
+
+
+
 });

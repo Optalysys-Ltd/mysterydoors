@@ -94,7 +94,7 @@ export interface BattleshipsInterface extends Interface {
     functionFragment: "getGuesses",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "joinGame", values?: undefined): string;
+  encodeFunctionData(functionFragment: "joinGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "numPlayers",
     values?: undefined
@@ -271,7 +271,7 @@ export interface Battleships extends BaseContract {
     "view"
   >;
 
-  joinGame: TypedContractMethod<[], [void], "nonpayable">;
+  joinGame: TypedContractMethod<[name: string], [void], "nonpayable">;
 
   numPlayers: TypedContractMethod<[], [bigint], "view">;
 
@@ -285,7 +285,7 @@ export interface Battleships extends BaseContract {
     "nonpayable"
   >;
 
-  players: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  players: TypedContractMethod<[arg0: AddressLike], [string], "view">;
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
@@ -341,7 +341,7 @@ export interface Battleships extends BaseContract {
   ): TypedContractMethod<[], [Battleships.ECoordStructOutput[]], "view">;
   getFunction(
     nameOrSignature: "joinGame"
-  ): TypedContractMethod<[], [void], "nonpayable">;
+  ): TypedContractMethod<[name: string], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "numPlayers"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -360,7 +360,7 @@ export interface Battleships extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "players"
-  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  ): TypedContractMethod<[arg0: AddressLike], [string], "view">;
   getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
