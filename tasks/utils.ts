@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import { ethers, HDNodeWallet } from 'ethers'
 import createPrompt from 'prompt-sync'
-import { FhevmInstance, FhevmInstanceConfig, createInstance as createFhevmInstance } from "@zama-fhe/relayer-sdk/node"
+import { DecryptedResults, FhevmInstance, FhevmInstanceConfig, createInstance as createFhevmInstance } from "@zama-fhe/relayer-sdk/node"
 
 type TestnetConfig = {
   jsonRpcUrl: string
@@ -69,7 +69,7 @@ export async function loadTestnetConfig(configFile: string): Promise<TestnetConf
   }
 }
 
-export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWallet, ciphertextHandle: string, contractAddress: string): Promise<string | bigint | boolean> {
+export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWallet, ciphertextHandles: string[], contractAddress: string): Promise<DecryptedResults> {
   // instance: [`FhevmInstance`] from `zama-fhe/relayer-sdk`
   // signer: [`Signer`] from ethers (could a [`Wallet`])
   // ciphertextHandle: [`string`]
@@ -78,12 +78,12 @@ export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWa
   timestampLog("Generating keypair...")
 
   const keypair = instance.generateKeypair();
-  const handleContractPairs = [
-    {
+  const handleContractPairs = ciphertextHandles.map((ciphertextHandle) => {
+    return {
       handle: ciphertextHandle,
       contractAddress: contractAddress,
-    },
-  ];
+    };
+  });
   const startTimeStamp = Math.floor(Date.now() / 1000).toString();
   const durationDays = '10'; // String for consistency
   const contractAddresses = [contractAddress];
@@ -96,7 +96,7 @@ export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWa
     durationDays,
   );
 
-  timestampLog("Sign typed data...")
+  timestampLog(`Signer ${signer.address} sign typed data...`)
 
   const signature = await signer.signTypedData(
     eip712.domain,
@@ -118,9 +118,12 @@ export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWa
     startTimeStamp,
     durationDays,
   );
-  console.log(result);
-
-  const decryptedValue = result[ciphertextHandle];
-  timestampLog("Result: " + decryptedValue);
-  return decryptedValue;
+  return result;
 }
+
+export type Coord = {
+  x: number;
+  y: number;
+};
+
+export const MAX_GUESSES = 5;
