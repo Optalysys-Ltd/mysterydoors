@@ -1,13 +1,12 @@
 import * as fs from "fs"
 import { task } from 'hardhat/config'
 import type { TaskArguments } from 'hardhat/types'
-import { loadWallet, timestampLog, loadTestnetConfig, createInstance, setupUserDecrypt } from "./utils"
-import { FHECounter__factory } from "../typechain-types/factories/contracts/FHECounter__factory";
-import { FHECounter } from "../typechain-types/contracts/FHECounter";
+import { loadWallet, timestampLog, loadTestnetConfig, createInstance, setupUserDecrypt, Coord } from "./utils"
+import { Battleships, Battleships__factory } from "../typechain-types";
 import { HDNodeWallet } from "ethers";
 
 
-task('task:deployFheCounter')
+task('task:adminDeployBattleships')
     .addParam('configFile', 'JSON file to read testnet config from')
     .addParam('addressFile', 'File to write address of deployed contract to')
     .addParam('keyFile', 'Encrypted key to sign transactions')
@@ -19,7 +18,7 @@ task('task:deployFheCounter')
         timestampLog("Connecting wallet")
         const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl))
         timestampLog("Deploying contract")
-        const contract = await new FHECounter__factory(connectedWallet).deploy(
+        const contract = await new Battleships__factory(connectedWallet).deploy(
             ethers.getAddress(testnetConfig.aclContractAddress),
             ethers.getAddress(testnetConfig.fhevmExecutorContractAddress),
             ethers.getAddress(testnetConfig.kmsVerifierContractAddress),
@@ -34,8 +33,9 @@ task('task:deployFheCounter')
     })
 
 
-task('task:incrementFheCounter')
-    .addParam('input', 'Amount to increment')
+task('task:adminEncryptShipPosition')
+    .addParam('x', 'x coordinate of ship')
+    .addParam('y', 'y coordinate of ship')
     .addParam('inputFile', 'File to write encrypted input and zkproof to')
     .addParam('configFile', 'JSON file to read testnet config from')
     .addParam('addressFile', 'File to read address of deployed contract from')
@@ -60,7 +60,7 @@ task('task:incrementFheCounter')
         )
         timestampLog("Encrypting...")
         const encryptedInput = await (fhevmInstance.createEncryptedInput(contractAddress, wallet.address)
-            .add32(Number(taskArguments.input)).encrypt())
+            .add8(Number(taskArguments.x)).add8(taskArguments.y).encrypt())
         timestampLog("Input encrypted")
         fs.writeFileSync(
             taskArguments.inputFile,
@@ -78,7 +78,7 @@ task('task:incrementFheCounter')
     })
 
 
-task('task:callIncrementFheCounter')
+task('task:adminCallPlaceShip')
     .addParam('inputFile', 'File to read encrypted input and zkproof from')
     .addParam('configFile', 'JSON file to read testnet config from')
     .addParam('addressFile', 'File to read address of deployed contract from')
@@ -103,16 +103,62 @@ task('task:callIncrementFheCounter')
         timestampLog("Connecting wallet")
         const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl))
         timestampLog("Connecting to contract")
-        const contract = new FHECounter__factory(connectedWallet).attach(contractAddress) as FHECounter
-        timestampLog("Calling increment on contract")
-        const txResponse = await contract.increment(encryptedInput.handles[0], encryptedInput.inputProof)
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        timestampLog("Calling placeShip on contract")
+        const txResponse = await contract.placeShip(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.inputProof)
         timestampLog("Transaction hash: " + txResponse.hash)
         timestampLog("Waiting for transaction to be included in block...")
         const txReceipt = await txResponse.wait()
         timestampLog("Transaction receipt received. Block number: " + txReceipt?.blockNumber)
     })
 
-task('task:decryptFheCounter')
+task('task:adminStartGame')
+    .addParam('configFile', 'JSON file to read testnet config from')
+    .addParam('addressFile', 'File to read address of deployed contract from')
+    .addParam('keyFile', 'Encrypted key to derive user address from')
+    .setAction(async function (taskArguments: TaskArguments, { ethers }) {
+        timestampLog("Loading wallet")
+        const wallet = await loadWallet(taskArguments.keyFile)
+        timestampLog("Loading contract address")
+        const contractAddress = await fs.promises.readFile(taskArguments.addressFile, 'utf8')
+        timestampLog("Loading testnet config")
+        const testnetConfig = await loadTestnetConfig(taskArguments.configFile);
+        timestampLog("Connecting wallet")
+        const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl))
+        timestampLog("Connecting to contract")
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        timestampLog("Calling startGame on contract")
+        const txResponse = await contract.startGame();
+        timestampLog("Transaction hash: " + txResponse.hash)
+        timestampLog("Waiting for transaction to be included in block...")
+        const txReceipt = await txResponse.wait()
+        timestampLog("Transaction receipt received. Block number: " + txReceipt?.blockNumber)
+    });
+
+task('task:adminEndGame')
+    .addParam('configFile', 'JSON file to read testnet config from')
+    .addParam('addressFile', 'File to read address of deployed contract from')
+    .addParam('keyFile', 'Encrypted key to derive user address from')
+    .setAction(async function (taskArguments: TaskArguments, { ethers }) {
+        timestampLog("Loading wallet")
+        const wallet = await loadWallet(taskArguments.keyFile)
+        timestampLog("Loading contract address")
+        const contractAddress = await fs.promises.readFile(taskArguments.addressFile, 'utf8')
+        timestampLog("Loading testnet config")
+        const testnetConfig = await loadTestnetConfig(taskArguments.configFile);
+        timestampLog("Connecting wallet")
+        const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl))
+        timestampLog("Connecting to contract")
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        timestampLog("Calling endGame on contract")
+        const txResponse = await contract.endGame();
+        timestampLog("Transaction hash: " + txResponse.hash)
+        timestampLog("Waiting for transaction to be included in block...")
+        const txReceipt = await txResponse.wait()
+        timestampLog("Transaction receipt received. Block number: " + txReceipt?.blockNumber)
+    });
+
+task('task:adminGetShipPositions')
     .addParam('configFile', 'JSON file to read testnet config from')
     .addParam('addressFile', 'File to read address of deployed contract from')
     .addParam('keyFile', 'Encrypted key to derive user address from')
@@ -137,10 +183,17 @@ task('task:decryptFheCounter')
         timestampLog("Connecting wallet")
         const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl)) as HDNodeWallet;
         timestampLog("Connecting to contract")
-        const contract = new FHECounter__factory(connectedWallet).attach(contractAddress) as FHECounter
-        timestampLog("Calling getCount on contract to get ciphertext handle")
-        const handle = await contract.getCount();
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        timestampLog("Calling getShipPositions on contract to get ciphertext handles")
+        const eShipPositionsList = await contract.getShipPositions();
         timestampLog("Requesting decryption...")
-        const decryptedCount = await setupUserDecrypt(fhevmInstance, connectedWallet, handle, contractAddress);
-        timestampLog("Decrypted count: " + decryptedCount);
+        const handles = eShipPositionsList.reduce((handles: string[], eShipPosition: Battleships.ECoordStructOutput) => {
+            handles.push(eShipPosition.x);
+            handles.push(eShipPosition.y);
+            return handles;
+        }, []);
+        const decryptedHandles = await fhevmInstance.publicDecrypt(handles);
+        const dShipPositionsList: Coord[] = eShipPositionsList.map((eShipPosition: Battleships.ECoordStructOutput) => {
+            return { x: BigInt(decryptedHandles[eShipPosition.x]) as unknown as number, y: BigInt(decryptedHandles[eShipPosition.y]) as unknown as number };
+        }); timestampLog("Decrypted ship positions: " + dShipPositionsList);
     })

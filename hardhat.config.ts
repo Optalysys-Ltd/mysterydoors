@@ -5,10 +5,9 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import { type HardhatUserConfig } from 'hardhat/config';
 
 import "./tasks/account"
-import "./tasks/contract"
-import "./tasks/simple"
-import "./tasks/sum"
-import "./tasks/fhecounter"
+import "./tasks/admin_battleships"
+import "./tasks/player_battleships"
+
 
 const config: HardhatUserConfig = {
   paths: {
