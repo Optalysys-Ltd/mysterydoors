@@ -190,7 +190,7 @@ When the game ends, the contract owner makes the ship positions publicly decrypt
  pnpm hardhat task:adminEndGame --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
 ```
 
-### Admin: Request Public Decryption of ship positions after the game has ended
+### Admin: Get ship positions and decrypt them after the game has ended
 
 Now that a reference to the ciphertext is stored on the blockchain, ACLs have been created that control who can interact with that ciphertext. If you [look at the contract code](./contracts/Battleships.sol) endGame you will see that we allow public decryption of the ship positions. See [Zama's docs](https://docs.zama.ai/protocol/relayer-sdk-guides/fhevm-relayer/decryption/public-decryption) for more details about public decryption. Lets use public decryption to get the plaintext of the values stored on the blockchain.
 
@@ -258,4 +258,26 @@ pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-
 2025-11-03T12:02:15.045Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
 2025-11-03T12:02:15.055Z :: User decrypt...
 2025-11-03T12:02:26.683Z :: Decrypted number of correct guesses: 1
+```
+
+### Player: Decrypt your guesses
+To see what guesses you have made so far:
+
+```bash
+pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+2025-11-03T13:07:04.425Z :: Calling getGuesses on contract to get ciphertext handles
+2025-11-03T13:07:04.698Z :: Requesting decryption...
+2025-11-03T13:07:04.699Z :: Generating keypair...
+2025-11-03T13:07:04.709Z :: Creating EIP712...
+2025-11-03T13:07:04.710Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-03T13:07:04.722Z :: User decrypt...
+2025-11-03T13:07:14.474Z :: Decrypted player guesses: 
+[ { x: 0n, y: 0n }, { x: 3n, y: 3n } ]
+```
+
+### Player: Get ship positions and decrypt them
+When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
+
+```bash
+ pnpm hardhat task:getShipPositions --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
 ```

@@ -195,7 +195,9 @@ task('task:adminGetShipPositions')
         const decryptedHandles = await fhevmInstance.publicDecrypt(handles);
         const dShipPositionsList: Coord[] = eShipPositionsList.map((eShipPosition: Battleships.ECoordStructOutput) => {
             return { x: BigInt(decryptedHandles[eShipPosition.x]) as unknown as number, y: BigInt(decryptedHandles[eShipPosition.y]) as unknown as number };
-        }); timestampLog("Decrypted ship positions: " + dShipPositionsList);
+        });
+        timestampLog("Decrypted ship positions: ");
+        console.log(dShipPositionsList);
     })
 
 task('task:adminGetPlayersCorrectGuesses')

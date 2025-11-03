@@ -143,6 +143,48 @@ task('task:getCorrectGuesses')
         timestampLog(`Decrypted number of correct guesses: ${correctGuesses}`);
     });
 
+task('task:getGuesses')
+    .addParam('configFile', 'JSON file to read testnet config from')
+    .addParam('addressFile', 'File to read address of deployed contract from')
+    .addParam('keyFile', 'Encrypted key to derive user address from')
+    .setAction(async function (taskArguments: TaskArguments, { ethers }) {
+        timestampLog("Loading wallet")
+        const wallet = await loadWallet(taskArguments.keyFile)
+        timestampLog("Loading contract address")
+        const contractAddress = await fs.promises.readFile(taskArguments.addressFile, 'utf8')
+        timestampLog("Loading testnet config")
+        const testnetConfig = await loadTestnetConfig(taskArguments.configFile);
+        timestampLog("Instantiating fhevm instance")
+        const fhevmInstance = await createInstance(
+            testnetConfig.decryptionContractAddress,
+            testnetConfig.inputVerificationContractAddress,
+            testnetConfig.inputVerifierContractAddress,
+            testnetConfig.kmsVerifierContractAddress,
+            testnetConfig.aclContractAddress,
+            testnetConfig.gatewayChainId,
+            testnetConfig.relayerUrl,
+            testnetConfig.jsonRpcUrl,
+        )
+        timestampLog("Connecting wallet")
+        const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl)) as HDNodeWallet;
+        timestampLog("Connecting to contract")
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        timestampLog("Calling getGuesses on contract to get ciphertext handles")
+        const ePlayerGuesses = await contract.getGuesses();
+        timestampLog("Requesting decryption...")
+        const handles = ePlayerGuesses.reduce((handles: string[], eShipPosition: Battleships.ECoordStructOutput) => {
+            handles.push(eShipPosition.x);
+            handles.push(eShipPosition.y);
+            return handles;
+        }, []);
+        const decryptedHandles = await setupUserDecrypt(fhevmInstance, connectedWallet, handles, contractAddress);
+        const dPlayerGuessesList: Coord[] = ePlayerGuesses.map((ePlayerGuess: Battleships.ECoordStructOutput) => {
+            return { x: BigInt(decryptedHandles[ePlayerGuess.x]) as unknown as number, y: BigInt(decryptedHandles[ePlayerGuess.y]) as unknown as number };
+        }); 
+        timestampLog("Decrypted player guesses: ");
+        console.log(dPlayerGuessesList);
+    })
+
 task('task:getShipPositions')
     .addParam('configFile', 'JSON file to read testnet config from')
     .addParam('addressFile', 'File to read address of deployed contract from')
@@ -180,5 +222,7 @@ task('task:getShipPositions')
         const decryptedHandles = await fhevmInstance.publicDecrypt(handles);
         const dShipPositionsList: Coord[] = eShipPositionsList.map((eShipPosition: Battleships.ECoordStructOutput) => {
             return { x: BigInt(decryptedHandles[eShipPosition.x]) as unknown as number, y: BigInt(decryptedHandles[eShipPosition.y]) as unknown as number };
-        }); timestampLog("Decrypted ship positions: " + dShipPositionsList);
+        }); 
+        timestampLog("Decrypted ship positions: ");
+        console.log(dShipPositionsList);
     })
