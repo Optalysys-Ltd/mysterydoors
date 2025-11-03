@@ -186,16 +186,25 @@ Call end game after all players have finished all their turns.
 When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
 
 ```bash
- pnpm hardhat task:adminEndGame --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
+pnpm hardhat task:adminEndMysteryDoors --config-file test
+net_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-03T18:49:31.742Z :: Calling endGame on contract
+2025-11-03T18:49:33.927Z :: Transaction hash: 0xb0fde5fbefc80aeadba8e07b0f57309bb895bc4784f9eb07a33a7e56a15baa30
+2025-11-03T18:49:33.927Z :: Waiting for transaction to be included in block...
+2025-11-03T18:49:43.238Z :: Transaction receipt received. Block number: 186059
 ```
 
-### Admin: Get ship positions and decrypt them after the game has ended
+### Admin: Get occupied positions and decrypt them after the game has ended
 
-Now that a reference to the ciphertext is stored on the blockchain, ACLs have been created that control who can interact with that ciphertext. If you [look at the contract code](./contracts/Battleships.sol) endGame you will see that we allow public decryption of the ship positions. See [Zama's docs](https://docs.zama.ai/protocol/relayer-sdk-guides/fhevm-relayer/decryption/public-decryption) for more details about public decryption. Lets use public decryption to get the plaintext of the values stored on the blockchain.
+Now that a reference to the ciphertext is stored on the blockchain, ACLs have been created that control who can interact with that ciphertext. If you [look at the contract code](./contracts/MysteryDoors.sol) endGame you will see that we allow public decryption of the occupied positions. See [Zama's docs](https://docs.zama.ai/protocol/relayer-sdk-guides/fhevm-relayer/decryption/public-decryption) for more details about public decryption. Lets use public decryption to get the plaintext of the values stored on the blockchain.
 
 
 ```bash
- pnpm hardhat task:adminGetShipPositions --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
+pnpm hardhat task:adminGetOccupiedPositions --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-03T18:51:07.454Z :: Calling getOccupiedPositions on contract to get ciphertext handles
+2025-11-03T18:51:07.718Z :: Requesting decryption...
+2025-11-03T18:51:20.436Z :: Decrypted occupied positions: 
+[ 24n, 23n, 22n, 17n, 12n ]
 ```
 
 ## Player
@@ -246,12 +255,13 @@ After they have made their guesses, the player can get the number of correct gue
 
 ```bash
 pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
-2025-11-03T17:44:07.756Z :: Calling getCorrectGuesses on contract
-2025-11-03T17:44:08.012Z :: Requesting decryption...
-2025-11-03T17:44:08.013Z :: Generating keypair...
-2025-11-03T17:44:08.020Z :: Creating EIP712...
-2025-11-03T17:44:08.021Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
-2025-11-03T17:44:08.032Z :: User decrypt...
+2025-11-03T18:39:39.417Z :: Calling getCorrectGuesses on contract
+2025-11-03T18:39:39.695Z :: Requesting decryption...
+2025-11-03T18:39:39.695Z :: Generating keypair...
+2025-11-03T18:39:39.702Z :: Creating EIP712...
+2025-11-03T18:39:39.703Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-03T18:39:39.711Z :: User decrypt...
+2025-11-03T18:39:56.613Z :: Decrypted number of correct guesses: 1
 ```
 
 
@@ -266,5 +276,9 @@ To see the guesses you have submitted:
 When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
 
 ```bash
- pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json 
+pnpm hardhat task:getOccupiedPositions --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
+2025-11-03T18:51:56.797Z :: Calling getOccupiedPositions on contract to get ciphertext handles
+2025-11-03T18:51:56.988Z :: Requesting decryption...
+2025-11-03T18:51:58.048Z :: Decrypted occupied positions: 
+[ 24n, 23n, 22n, 17n, 12n ]
 ```

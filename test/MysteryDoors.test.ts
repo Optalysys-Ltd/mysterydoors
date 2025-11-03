@@ -176,6 +176,7 @@ describe("MysteryDoors", function () {
     await mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
 
     const playerGuesses = await mysteryDoorsContract.connect(signers.alice).getGuesses();
+    expect(playerGuesses).to.have.length(MAX_GUESSES);
     for (let i = 0; i < playerGuesses.length; i++) {
       const decryptedGuess = await fhevm.userDecryptEuint(FhevmType.euint8, playerGuesses[i], mysteryDoorsContractAddress, signers.alice);
       expect(decryptedGuess).to.equal(positionGuesses[i]);

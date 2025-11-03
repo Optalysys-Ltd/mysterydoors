@@ -158,6 +158,8 @@ contract MysteryDoors is Ownable2Step {
         FHE.allow(ePos5, msg.sender);
         eGuesses[4] = ePos5;
 
+        playerGuesses[msg.sender] = eGuesses;
+
         for (uint256 g = 0; g < eGuesses.length; g++) {
             euint8 eGuess = eGuesses[g];
             for (uint256 i = 0; i < occupiedPositions.length; i++) {
@@ -167,10 +169,11 @@ contract MysteryDoors is Ownable2Step {
                     playerCorrectGuesses[msg.sender],
                     FHE.select(correctlyGuessed, _EUINT8_ONE, _EUINT8_ZERO)
                 );
-                FHE.allowThis(playerCorrectGuesses[msg.sender]);
-                FHE.allow(playerCorrectGuesses[msg.sender], msg.sender);
             }
         }
+
+        FHE.allowThis(playerCorrectGuesses[msg.sender]);
+        FHE.allow(playerCorrectGuesses[msg.sender], msg.sender);
     }
 
     function getGuesses() public view returns (euint8[] memory) {
