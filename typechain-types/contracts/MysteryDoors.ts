@@ -29,6 +29,7 @@ export interface MysteryDoorsInterface extends Interface {
       | "MAX_GUESSES"
       | "MAX_PLAYERS"
       | "acceptOwnership"
+      | "collateLeaderboard"
       | "ePlayerCorrectGuessesList"
       | "endGame"
       | "gameOver"
@@ -44,6 +45,7 @@ export interface MysteryDoorsInterface extends Interface {
       | "owner"
       | "pendingOwner"
       | "playerNames"
+      | "playerNamesList"
       | "playersList"
       | "renounceOwnership"
       | "startGame"
@@ -64,6 +66,10 @@ export interface MysteryDoorsInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "acceptOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "collateLeaderboard",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -115,6 +121,10 @@ export interface MysteryDoorsInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "playerNamesList",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "playersList",
     values: [BigNumberish]
   ): string;
@@ -138,6 +148,10 @@ export interface MysteryDoorsInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "acceptOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "collateLeaderboard",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -180,6 +194,10 @@ export interface MysteryDoorsInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "playerNames",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "playerNamesList",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -272,6 +290,8 @@ export interface MysteryDoors extends BaseContract {
 
   acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
+  collateLeaderboard: TypedContractMethod<[], [void], "nonpayable">;
+
   ePlayerCorrectGuessesList: TypedContractMethod<
     [arg0: BigNumberish],
     [string],
@@ -292,7 +312,7 @@ export interface MysteryDoors extends BaseContract {
 
   getPlayersCorrectGuesses: TypedContractMethod<
     [],
-    [[string[], string[]]],
+    [[string[], string[], string[]]],
     "view"
   >;
 
@@ -332,6 +352,8 @@ export interface MysteryDoors extends BaseContract {
 
   playerNames: TypedContractMethod<[arg0: AddressLike], [string], "view">;
 
+  playerNamesList: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+
   playersList: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
@@ -358,6 +380,9 @@ export interface MysteryDoors extends BaseContract {
     nameOrSignature: "acceptOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "collateLeaderboard"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "ePlayerCorrectGuessesList"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
@@ -380,7 +405,7 @@ export interface MysteryDoors extends BaseContract {
   ): TypedContractMethod<[], [string[]], "view">;
   getFunction(
     nameOrSignature: "getPlayersCorrectGuesses"
-  ): TypedContractMethod<[], [[string[], string[]]], "view">;
+  ): TypedContractMethod<[], [[string[], string[], string[]]], "view">;
   getFunction(
     nameOrSignature: "joinGame"
   ): TypedContractMethod<[name: string], [void], "nonpayable">;
@@ -424,6 +449,9 @@ export interface MysteryDoors extends BaseContract {
   getFunction(
     nameOrSignature: "playerNames"
   ): TypedContractMethod<[arg0: AddressLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "playerNamesList"
+  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
     nameOrSignature: "playersList"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;

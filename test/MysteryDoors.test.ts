@@ -148,7 +148,7 @@ describe("MysteryDoors", function () {
   });
 
   it("Leaderboard with no players", async () => {
-    const [playersList, ePlayerCorrectGuessesList] = await mysteryDoorsContract.connect(signers.deployer).getPlayersCorrectGuesses();
+    const [playersList, ePlayerCorrectGuessesList, playerNamesList] = await mysteryDoorsContract.connect(signers.deployer).getPlayersCorrectGuesses();
     expect(ePlayerCorrectGuessesList).to.have.length(0);
     expect(playersList).to.have.length(0);
     const result = await setupUserDecrypt(fhevm, wallet, ePlayerCorrectGuessesList, mysteryDoorsContractAddress);
@@ -156,7 +156,7 @@ describe("MysteryDoors", function () {
     const playerNumCorrectGuesses: Record<string, number> = {};
     let handleIndex = 0;
     for (const key in result) {
-      playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint as unknown as number;
+      playerNumCorrectGuesses[`${playersList[handleIndex]}: ${playerNamesList[handleIndex]}`] = result[key] as bigint as unknown as number;
       handleIndex++;
     }
     console.log(playerNumCorrectGuesses);
@@ -246,19 +246,20 @@ describe("MysteryDoors", function () {
 
 
     await mysteryDoorsContract.connect(signers.deployer).endGame();
-    const [playersList, ePlayerCorrectGuessesList] = await mysteryDoorsContract.connect(signers.deployer).getPlayersCorrectGuesses();
+    const [playersList, ePlayerCorrectGuessesList, playerNamesList] = await mysteryDoorsContract.connect(signers.deployer).getPlayersCorrectGuesses();
     const result = await setupUserDecrypt(fhevm, wallet, ePlayerCorrectGuessesList, mysteryDoorsContractAddress);
     timestampLog("Result:");
+    expect(playerNamesList.length).to.equal(playersList.length);
     const playerNumCorrectGuesses: Record<string, bigint> = {};
     let handleIndex = 0;
     for (const key in result) {
-      playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint;
+      playerNumCorrectGuesses[`${playersList[handleIndex]}: ${playerNamesList[handleIndex]}`] = result[key] as bigint;
       handleIndex++;
     }
     expect(Object.keys(playerNumCorrectGuesses).length).to.eq(playersList.length);
     console.log(playerNumCorrectGuesses);
-    expect(playerNumCorrectGuesses[playersList[0]]).to.eq(players[0].expectedCorrectGuesses);
-    expect(playerNumCorrectGuesses[playersList[1]]).to.eq(players[1].expectedCorrectGuesses);
+    expect(playerNumCorrectGuesses[`${playersList[0]}: Alice`]).to.eq(players[0].expectedCorrectGuesses);
+    expect(playerNumCorrectGuesses[`${playersList[1]}: Bob`]).to.eq(players[1].expectedCorrectGuesses);
   });
 
   it("Occupied positions should not be publicly decryptable before the game ends", async () => {

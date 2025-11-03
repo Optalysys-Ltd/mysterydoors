@@ -208,6 +208,7 @@ pnpm hardhat task:adminGetOccupiedPositions --config-file testnet_config.json --
 ```
 
 ### Admin: Get leaderboard
+The leaderboard can be displayed even before the game ends:
 
 ```bash
 pnpm hardhat task:adminGetLeaderboard --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 

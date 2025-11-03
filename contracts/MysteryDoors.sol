@@ -56,16 +56,18 @@ contract MysteryDoors is Ownable2Step {
     function getPlayersCorrectGuesses()
         public
         view
-        returns (address[] memory, euint8[] memory)
+        returns (address[] memory, euint8[] memory, string[] memory)
     {
-        return (playersList, ePlayerCorrectGuessesList);
+        return (playersList, ePlayerCorrectGuessesList, playerNamesList);
     }
 
     function endGame() external onlyOwner {
         require(gameStarted, "The game has not yet started.");
         gameOver = true;
         ePlayerCorrectGuessesList = new euint8[](playersList.length);
+        playerNamesList = new string[](playersList.length);
         for (uint256 i = 0; i < playersList.length; i++) {
+            playerNamesList[i] = playerNames[playersList[i]];
             ePlayerCorrectGuessesList[i] = playerCorrectGuesses[playersList[i]];
             FHE.allowThis(ePlayerCorrectGuessesList[i]);
             FHE.allow(ePlayerCorrectGuessesList[i], msg.sender);
@@ -77,7 +79,10 @@ contract MysteryDoors is Ownable2Step {
 
     function startGame() public onlyOwner {
         require(!gameStarted, "The game has already started.");
-        require(occupiedPositions.length > 0, "The occupied positions haven't been set!");
+        require(
+            occupiedPositions.length > 0,
+            "The occupied positions haven't been set!"
+        );
         gameStarted = true;
         gameOver = false;
     }

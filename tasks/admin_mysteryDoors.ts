@@ -232,10 +232,10 @@ task('task:adminGetLeaderboard')
         const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl)) as HDNodeWallet;
         timestampLog("Connecting to contract")
         const contract = new MysteryDoors__factory(connectedWallet).attach(contractAddress) as MysteryDoors
-/*         timestampLog("Calling collateLeaderBoard on contract")
-        await contract.connect(connectedWallet).collateLeaderboard(); */
+        timestampLog("Calling collateLeaderBoard on contract")
+        await contract.connect(connectedWallet).collateLeaderboard();
         timestampLog("Calling getPlayersCorrectGuesses on contract to get ciphertext handles")
-        const [playersList, ePlayerCorrectGuessesList] = await contract.connect(connectedWallet).getPlayersCorrectGuesses();
+        const [playersList, ePlayerCorrectGuessesList, playerNamesList] = await contract.connect(connectedWallet).getPlayersCorrectGuesses();
         timestampLog("Decrypting handles ePlayerCorrectGuesses");
         console.log(ePlayerCorrectGuessesList);
         if (ePlayerCorrectGuessesList.length > 0) {
@@ -244,7 +244,7 @@ task('task:adminGetLeaderboard')
             const playerNumCorrectGuesses: Record<string, number> = {};
             let handleIndex = 0;
             for (const key in result) {
-                playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint as unknown as number;
+                playerNumCorrectGuesses[`${playersList[handleIndex]}: ${playerNamesList[handleIndex]}`] = result[key] as bigint as unknown as number;
                 handleIndex++;
             }
             console.log(playerNumCorrectGuesses);
