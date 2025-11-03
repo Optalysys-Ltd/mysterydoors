@@ -5,3 +5,4 @@ import type * as simpleSol from "./Simple.sol";
 export type { simpleSol };
 export type { Battleships } from "./Battleships";
 export type { FHECounter } from "./FHECounter";
+export type { MysteryDoors } from "./MysteryDoors";
