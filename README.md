@@ -125,353 +125,137 @@ Save this file in the root directory of the container you are using as your exec
 
 > Once you have the above you can start deploying smart contracts to the testnet that use FHE and interacting with them. The rest of this guide walks through deploying a simple test contract and interacting with it.
 
+## Admin
 
-### Deploy a Simple Contract
+### Admin: Deploy Battleships contract
 
 The hardhat tasks (prefixed by `task:`) are defined in the folder `tasks/`. The network config file are the config details to connect to the testnet, so there's no need to pass the `--network` param to hardhat (anyway, hardhat doesn't support custom network names).
 
 This deploys a simple contract to the testnet using the account and config you created in the previous steps. The contract is in the file `contracts/Simple.sol`. It demonstrates encrypting a uint8, and two uint8s, and public decryption. The deployed contract address is written to the file `test_contract.address`.
 
 ```bash
-pnpm hardhat task:deployTest --config-file testnet_config.json --address-file test_contract.address --key-file key.json
+pnpm hardhat task:adminDeployBattleships --config-file testnet_config.json --address-file battleships.address --key-file deployer.json
+2025-11-03T11:30:25.843Z :: Deploying contract
+2025-11-03T11:30:28.369Z :: Waiting for deployment...
+2025-11-03T11:30:33.838Z :: Contract deployed at block: 181668
+2025-11-03T11:30:33.838Z :: Contract address: 0x335803361FB6FdC13dF87B9eDC95B7dAB8CB075C
+2025-11-03T11:30:33.839Z :: Contract address written to file: battleships.address
 ```
 
-### Store an Encrypted Value on the Contract then Request Its Decryption
+### Admin: Encrypt a ship position (two uint8s) and call placeShip with the encrypted values
 
 As a first test we will encrypt an unsigned 8-bit integer, store it on the contract, then request its decryption.
 
-#### Encrypt an Unsigned 8-bit Integer 
+#### Encrypt two Unsigned 8-bit Integers
 
 This will fetch the URLs of the public keys from the relayer, then fetch the public keys from those URLs, use the public key to encrypt the input and then generate a zero-knowledge proof that we know the plaintext value for this ciphertext. The ciphertext and zkproof will be stored in a file `encrypted_input.json` so we can use them in following steps.
 
 ```bash
-pnpm hardhat task:encryptUint8 --input 7 --input-file encrypted_input.json --config-file testnet_config.json --address-file test_contract.address --key-file key.json
+pnpm hardhat task:adminEncryptShipPosition --x 4 --y 4 --input-file eShipPosition.json --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
+2025-11-03T11:45:02.933Z :: Encrypting...
+2025-11-03T11:46:57.067Z :: Input encrypted
+2025-11-03T11:46:57.068Z :: Encrypted input and ZK proof written to: eShipPosition.json
 ```
 
-#### Store Encrypted Value on Contract
+#### Call placeShip with the encrypted inputs
 
-Now that the coprocessors know about the ciphertext (from the previous action) and have returned an attestation of the zkproof, we can store the ciphertext (actually a "handle" that the coprocessors know references that ciphertext) from `encrypted_input.json` on our contract on the blockchain.
+Now that the coprocessors know about the ciphertext (from the previous action) and have returned an attestation of the zkproof, we can store the ciphertext (actually a "handle" that the coprocessors know references that ciphertext) from `eShipPosition.json` on our contract on the blockchain.
 
 ```bash
-pnpm hardhat task:storeEncryptedUint8 --input-file encrypted_input.json --config-file testnet_config.json --address-file test_contract.address --key-file key.json
+pnpm hardhat task:adminCallPlaceShip --input-file eShipPosition.json --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
+2025-11-03T11:48:16.566Z :: Calling placeShip on contract
+2025-11-03T11:48:18.763Z :: Transaction hash: 0xb833ffaf216b9107e53dfd41c093330734780e867d60f8c16e1091d213f654dc
+2025-11-03T11:48:18.763Z :: Waiting for transaction to be included in block...
+2025-11-03T11:48:28.212Z :: Transaction receipt received. Block number: 181847
 ```
 
-#### Request Public Decryption
-
-Now that a reference to the ciphertext is stored on the blockchain, ACLs have been created that control who can interact with that ciphertext. If you [look at the contract code](./contracts/Simple.sol) you will see that we allow public decryption of the ciphertext we just stored. In a real scenario this could be used for revealing the winner of a blind auction (for example). See [Zama's docs](https://docs.zama.ai/protocol/relayer-sdk-guides/fhevm-relayer/decryption/public-decryption) for more details about public decryption. Lets use public decryption to get the plaintext of the value stored on the blockchain.
-
-> The output should match the input provided in the earlier step when encrypting.
+### Start game
+Call start game after placing the ships
 
 ```bash
-pnpm hardhat task:publicDecryptionOfSimpleUint8 --config-file testnet_config.json --address-file test_contract.address
+ pnpm hardhat task:adminStartGame --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
+2025-11-03T11:48:53.244Z :: Calling startGame on contract
+2025-11-03T11:48:55.820Z :: Transaction hash: 0xd22ab6c3caed18fc158bd274f51f480be14c3117aa6a5c89cf7a8d413a22cf4e
+2025-11-03T11:48:55.821Z :: Waiting for transaction to be included in block...
+2025-11-03T11:49:05.129Z :: Transaction receipt received. Block number: 181853
 ```
 
-### Perform FHE Compute on the Blockchain and Request Result's Decryption
 
-The previous test confirmed that we can fetch the public keys, use them to encrypt a value, generate a zkproof of plaintext knowledge, get an attestation of our zkproof, store a reference to a ciphertext on a contract on the blockchain and then request it to be decrypted later.
+### Admin: End game
+Call end game after all players have finished all their turns.
 
-Now we will perform FHE compute on the blockchain.
-
-#### Encrypt 2 Unsigned 8-bit Integers 
-
-The first step is the same as before, but since we will be sending 2 encrypted values (inputs to sum under FHE) we need to encrypt them both. Fortunately generating the zkproof and getting the attestation takes a similar time as they can be submitted in a bundle together. The encrypted inputs are written to the file `encrypted_sum_inputs.json`.
+When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
 
 ```bash
-pnpm hardhat task:encryptSumInputs --input1 3 --input2 5 --input-file encrypted_sum_inputs.json --config-file testnet_config.json --address-file test_contract.address --key-file key.json
+ pnpm hardhat task:adminEndGame --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
 ```
 
-#### Request Encrypted Sum to be Stored on Contract
+### Admin: Request Public Decryption of ship positions after the game has ended
 
-Now that the coprocessors know about the ciphertexts (from the previous action) and have returned an attestation of the zkproof, we can send the ciphertexts (actually a "handle" that the coprocessors know references that ciphertext) read from `encrypted_sum_inputs.json` to our contract on the blockchain, calling a method that performs FHE compute to sum the 2 ciphertexts and stores the encrypted sum on the contract.
+Now that a reference to the ciphertext is stored on the blockchain, ACLs have been created that control who can interact with that ciphertext. If you [look at the contract code](./contracts/Battleships.sol) endGame you will see that we allow public decryption of the ship positions. See [Zama's docs](https://docs.zama.ai/protocol/relayer-sdk-guides/fhevm-relayer/decryption/public-decryption) for more details about public decryption. Lets use public decryption to get the plaintext of the values stored on the blockchain.
 
-On-chain the compute is done symbolically, and from the input handles and operations a new handle is deterministically calculated. The core FHE contracts that our contract uses then emit an event for each FHE operation which is seen by the coprocessors. The coprocessors then perform the actual FHE compute, making the result ciphertexts available for further calculation/decryption.
 
 ```bash
-pnpm hardhat task:requestEncryptedSum --input-file encrypted_sum_inputs.json --config-file testnet_config.json --address-file test_contract.address --key-file key.json
+ pnpm hardhat task:adminGetShipPositions --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
 ```
 
-#### Request Public Decryption
+## Player
+You need to join the game by supplying your name. The player has a maximum of 5 guesses. When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
 
-Now that a reference to the resultant (sum) ciphertext is stored on the blockchain, ACLs have been created that control who can interact with that ciphertext. If you [look at the contract code](./contracts/Simple.sol) you will see that we allow public decryption of the resultant ciphertext. In a real scenario this could be used for revealing the winner of a blind auction (for example). See [Zama's docs](https://docs.zama.ai/protocol/relayer-sdk-guides/fhevm-relayer/decryption/public-decryption) for more details about public decryption. Lets use public decryption to get the plaintext of the value stored on the blockchain.
-
-> Since the actual FHE compute happens asynchronously the ciphertext may not be available yet. If the ciphertext takes too long to be available then this will time out, but it can just be rerun to re-request the decryption.
-
-> The output should match the sum of the inputs provided in the earlier step when encrypting.
+### Player: Join game
 
 ```bash
-pnpm hardhat task:publicDecryptionOfSum --config-file testnet_config.json --address-file test_contract.address
+pnpm hardhat task:joinGame --name Alice --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+2025-11-03T11:49:54.419Z :: Calling joinGame on contract with name Alice
+2025-11-03T11:49:56.845Z :: Transaction hash: 0xbbb44ab199c2498d714332392756177c07abd3bf03e0707c2ceb3e9852e34eea
+2025-11-03T11:49:56.845Z :: Waiting for transaction to be included in block...
+2025-11-03T11:50:06.258Z :: Transaction receipt received. Block number: 181863
 ```
 
-
-## Unit tests
-To make sure the Simple contract works as expected, the unit tests can be run.
-
-### Optalysys testnet
-To test on the Optalysys testnet:
+### Player: Encrypt ship position guess (two uint8s)
+The guess is encrypted into the file `p1_e.json`
 
 ```bash
-pnpm run test
-> NETWORK=optalysys hardhat test
-
-  Simple
-2025-10-13T20:36:02.742Z :: Network name: optalysys
-2025-10-13T20:36:02.742Z :: Loading wallet
-2025-10-13T20:36:16.420Z :: Loading testnet config
-2025-10-13T20:36:16.423Z :: Connecting provider
-2025-10-13T20:36:16.425Z :: Connecting wallet
-2025-10-13T20:36:16.428Z :: Creating fhevm instance
-2025-10-13T20:36:17.609Z :: Deploying contract
-2025-10-13T20:36:17.819Z :: Waiting for deployment...
-2025-10-13T20:36:22.081Z :: Contract deployed at block: 6521
-2025-10-13T20:36:22.082Z :: Contract address: 0x7E36e4B752c1CcE4f4ed9a88dD217D1df5Bf274f
-    ✔ encrypted simple value should be uninitialized after deployment (52ms)
-    ✔ store value 4 (142138ms)
-    ✔ encrypted sum should be uninitialized after deployment (89ms)
-    ✔ store sum (119936ms)
-
-
-  4 passing (5m)
+pnpm hardhat task:encryptShipPosition --x 0 --y 0 --input-file p1_e.json --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+2025-11-03T11:51:05.654Z :: Encrypting...
+2025-11-03T11:53:03.009Z :: Input encrypted
+2025-11-03T11:53:03.010Z :: Encrypted input and ZK proof written to: p1_e.json
 ```
 
-This will deploy the test on the testnet and run through the contract methods
-
-
-### Hardhat local test
-To test on Hardhat:
-
-Open a terminal in the background to start the local network on Hardhat:
+### Player: Call addGuess with the encrypted inputs
+The encrypted guess is read from the input file `p1_e.json`
 
 ```bash
-pnpm run start-localhost
-> hardhat node
-
-Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/
-
-Accounts
-========
-
-WARNING: These accounts, and their private keys, are publicly known.
-Any funds sent to them on Mainnet or any other live network WILL BE LOST.
-
-Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10000 ETH)
-Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+pnpm hardhat task:callAddGuess --input-file p1_e.json --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+2025-11-03T11:55:17.344Z :: Calling addGuess contract
+2025-11-03T11:55:19.498Z :: Transaction hash: 0x0594ff0b69ba64826660ea5ba1055735cf95138aabd947f91a3656b071d59144
+2025-11-03T11:55:19.498Z :: Waiting for transaction to be included in block...
+2025-11-03T11:55:28.705Z :: Transaction receipt received. Block number: 181917
 ```
 
-Run the tests on hardhat in another terminal
+### Player: Get the number of correct guesses
+By keeping track of the previous number of correct guesses and the latest number of correct guesses, the player can infer whether their guess is a hit.
 
+First call:
 ```bash
-pnpm run test-localhost
-> hardhat test
-
-  Simple
-2025-10-13T20:43:53.853Z :: Network name: hardhat
-2025-10-13T20:43:53.853Z :: Running on hardhat, using mocked config
-2025-10-13T20:43:53.860Z :: Loading testnet config
-2025-10-13T20:43:53.862Z :: Connecting provider
-2025-10-13T20:43:53.875Z :: Using mock fhevm
-2025-10-13T20:43:53.875Z :: Deploying contract
-2025-10-13T20:43:53.896Z :: Waiting for deployment...
-2025-10-13T20:43:53.899Z :: Contract deployed at block: 3
-2025-10-13T20:43:53.900Z :: Contract address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
-    ✔ encrypted simple value should be uninitialized after deployment
-    ✔ store value 4 (114ms)
-    ✔ encrypted sum should be uninitialized after deployment
-    ✔ store sum (81ms)
-
-
-  4 passing (273ms)
+pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+2025-11-03T11:56:08.111Z :: Calling getCorrectGuesses on contract
+2025-11-03T11:56:08.333Z :: Requesting decryption...
+2025-11-03T11:56:08.334Z :: Generating keypair...
+2025-11-03T11:56:08.341Z :: Creating EIP712...
+2025-11-03T11:56:08.342Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-03T11:56:08.349Z :: User decrypt...
+2025-11-03T11:56:56.584Z :: Decrypted number of correct guesses: 0
 ```
 
-This will deploy the test on the hardhat localhost and run through the contract methods
-
-
-## Deploying your own contracts by using Optalysys testnet config instead of Zama's config
-This assumes you have knowledge of JavaScript and smart contracts. Follow [Zama's Quick Start tutorial](https://docs.zama.ai/protocol/solidity-guides/getting-started/quick-start-tutorial)
-
-The file [./tasks/contract.ts](./tasks/contract.ts) contains a deployment script. You can adapt this to deploy your own contract.
-
-Zama has some example contracts [here](https://docs.zama.ai/protocol/examples).
-
-This is where the instructions diverge from [Zama's instructions](https://docs.zama.ai/protocol/solidity-guides/smart-contract/configure).
-
-Instead of inheriting from ZamaConfig, pass Optalysys's config values in the constructor.
-
-Zama instructions:
-
-```solidity
-// SPDX-License-Identifier: BSD-3-Clause-Clear
-pragma solidity ^0.8.24;
-
-import { SepoliaConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
-
-contract MyERC20 is SepoliaConfig {
-  constructor() {
-    // Additional initialization logic if needed
-  }
-}
-```
-
-Change:
-
-```solidity
-// SPDX-License-Identifier: BSD-3-Clause-Clear
-pragma solidity ^0.8.24;
-
-// REMOVE ZamaConfig
-//import { SepoliaConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
-
-// REMOVE ZamaConfig
-contract MyERC20 { // is SepoliaConfig {
-    constructor(
-        address aclAdd,
-        address fhevmExecutorAdd,
-        address kmsVerifierAdd,
-        address decryptionOracleAdd
-    ) {
-        FHE.setCoprocessor(CoprocessorConfig({
-            ACLAddress: aclAdd,
-            CoprocessorAddress: fhevmExecutorAdd,
-            DecryptionOracleAddress: decryptionOracleAdd,
-            KMSVerifierAddress: kmsVerifierAdd
-        }));
-
-    }
-}
-```
-
-The Coprocessor config values will need to be set in the deploy constructor e.g.:
-
-```javascript
-await contractFactory.deploy(
-  ethers.getAddress(testnetConfig.aclContractAddress),
-  ethers.getAddress(testnetConfig.fhevmExecutorContractAddress),
-  ethers.getAddress(testnetConfig.kmsVerifierContractAddress),
-  ethers.getAddress(testnetConfig.decryptionOracleContractAddress),
-);
-```
-
-Run `pnpm hardhat compile` to [generate TypeScript types](https://docs.zama.ai/protocol/solidity-guides/getting-started/quick-start-tutorial/write_a_simple_contract#compile-counter.sol)
-
+Calling it again:
 ```bash
-
+pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+2025-11-03T12:02:14.819Z :: Calling getCorrectGuesses on contract
+2025-11-03T12:02:15.035Z :: Requesting decryption...
+2025-11-03T12:02:15.036Z :: Generating keypair...
+2025-11-03T12:02:15.044Z :: Creating EIP712...
+2025-11-03T12:02:15.045Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-03T12:02:15.055Z :: User decrypt...
+2025-11-03T12:02:26.683Z :: Decrypted number of correct guesses: 1
 ```
-
-### Example converting Zama's FHE Counter contract
-Get the FHE Counter files from [here](https://docs.zama.ai/protocol/examples#fhecounter.sol).
-
-The FHE Counter files have been put into the project at [contracts/FHECounter.sol](contracts/FHECounter.sol) and [test/FHECounter.test.ts](test/FHECounter.test.ts) (test only runs on hardhat localhost). Note how the constructor has been modified following the instructions in "Deploying your own contracts by using Optalysys testnet config instead of Zama's config".
-
-
-Compile the contracts to create the TypeScript types:
-
-```bash
-pnpm hardhat compile
-Downloading compiler 0.8.24
-Generating typings for: 9 artifacts in dir: typechain-types for target: ethers-v6
-Compiled 6 Solidity files successfully (evm target: cancun).
-
-ls typechain-types/contracts/
-FHECounter.ts  index.ts  Simple.sol
-```
-
-Now the TypeScript types have been generated and can be imported for hardhat tasks and tests.
-
-Take a look at [tasks/fhecounter.ts](tasks/fhecounter.ts) which have been written for the user to interact with the smart contract by calling Hardhat tasks.
-
-First deploy the contract
-
-```bash
-pnpm hardhat task:deployFheCounter --config-file testnet_config.json --address-file fhe_counter.address --key-file key.json 
-2025-10-28T14:25:31.413Z :: Loading wallet
-Set WALLET_PASSWORD env var to skip this prompt
-Enter password for wallet: 
-2025-10-28T14:25:32.686Z :: Loading testnet config
-2025-10-28T14:25:32.687Z :: Connecting wallet
-2025-10-28T14:25:32.699Z :: Deploying contract
-2025-10-28T14:25:34.745Z :: Waiting for deployment...
-2025-10-28T14:25:44.146Z :: Contract deployed at block: 97020
-2025-10-28T14:25:44.146Z :: Contract address: 0x0Bfea07384337E0081Ee14A88b4F3CCB20FCE02D
-2025-10-28T14:25:44.146Z :: Contract address written to file: fhe_counter.address
-```
-
-Encrypt the value to increment the counter by (here it's set to 4) and save it to `--input-file`
-
-```bash
-pnpm hardhat task:incrementFheCounter --input 4 --input-file inputs.json --config-file testnet_config.json --address-file fhe_counter.address --key-file wallet_key.json 
-2025-10-28T14:27:44.527Z :: Loading wallet
-Set WALLET_PASSWORD env var to skip this prompt
-Enter password for wallet: 
-2025-10-28T14:27:46.010Z :: Loading contract address
-2025-10-28T14:27:46.010Z :: Loading testnet config
-2025-10-28T14:27:46.011Z :: Instantiating fhevm instance
-2025-10-28T14:27:46.011Z :: {
-  verifyingContractAddressDecryption: '0x2a4c38464aaB36c448b373D55fEA7A9827bF6E9f',
-  verifyingContractAddressInputVerification: '0x94baae27C5F3f647C31a5a7d863701C08736E797',
-  inputVerifierContractAddress: '0x5D85721B3014c6ecDC8eF018d3E86Ca663639370',
-  kmsContractAddress: '0x5A8ac1C8D2a8f163D875ed32bbf4FF1C530d4550',
-  aclContractAddress: '0x053dC8674A6F4817d3AC01C89FbE573024f681C4',
-  gatewayChainId: '678259798',
-  relayerUrl: 'https://relayer.gcp-testnet-eth.dev.optalysys.com',
-  network: 'https://rpc.gcp-testnet-eth.dev.optalysys.com'
-}
-2025-10-28T14:27:52.631Z :: Encrypting...
-2025-10-28T14:29:00.535Z :: Input encrypted
-2025-10-28T14:29:00.536Z :: Encrypted input and ZK proof written to: inputs.json
-```
-
-Call the contract's `increment` call with the encrypted input and ZK proof created in the previous step:
-
-```bash
-pnpm hardhat task:callIncrementFheCounter --input-file inputs.json --config-file testnet_config.json --address-file fhe_counter.address --key-file wallet_key.json 
-2025-10-28T14:29:07.007Z :: Loading wallet
-Set WALLET_PASSWORD env var to skip this prompt
-Enter password for wallet: 
-2025-10-28T14:29:07.927Z :: Loading contract address
-2025-10-28T14:29:07.927Z :: Loading testnet config
-2025-10-28T14:29:07.928Z :: Loading encrypted input and zkproof
-2025-10-28T14:29:07.928Z :: Connecting wallet
-2025-10-28T14:29:07.937Z :: Connecting to contract
-2025-10-28T14:29:07.938Z :: Calling increment on contract
-2025-10-28T14:29:10.313Z :: Transaction hash: 0xffaf4ad8bb1042da36ba835b2c871e5bcec7569597eaf4727a27e38ed8c0990b
-2025-10-28T14:29:10.313Z :: Waiting for transaction to be included in block...
-2025-10-28T14:29:19.365Z :: Transaction receipt received. Block number: 97056
-```
-
-Decrypt the counter. Note that the value of the counter has incremented by the value you have set.
-
-```bash
-pnpm hardhat task:decryptFheCounter --config-file testnet_config.json --address-file fhe_counter.address --key-file wallet_key.json 
-2025-10-28T14:29:26.212Z :: Loading wallet
-Set WALLET_PASSWORD env var to skip this prompt
-Enter password for wallet: 
-2025-10-28T14:29:27.371Z :: Loading contract address
-2025-10-28T14:29:27.372Z :: Loading testnet config
-2025-10-28T14:29:27.372Z :: Instantiating fhevm instance
-2025-10-28T14:29:27.372Z :: {
-  verifyingContractAddressDecryption: '0x2a4c38464aaB36c448b373D55fEA7A9827bF6E9f',
-  verifyingContractAddressInputVerification: '0x94baae27C5F3f647C31a5a7d863701C08736E797',
-  inputVerifierContractAddress: '0x5D85721B3014c6ecDC8eF018d3E86Ca663639370',
-  kmsContractAddress: '0x5A8ac1C8D2a8f163D875ed32bbf4FF1C530d4550',
-  aclContractAddress: '0x053dC8674A6F4817d3AC01C89FbE573024f681C4',
-  gatewayChainId: '678259798',
-  relayerUrl: 'https://relayer.gcp-testnet-eth.dev.optalysys.com',
-  network: 'https://rpc.gcp-testnet-eth.dev.optalysys.com'
-}
-2025-10-28T14:29:35.748Z :: Connecting wallet
-2025-10-28T14:29:35.761Z :: Connecting to contract
-2025-10-28T14:29:35.763Z :: Calling getCount on contract to get ciphertext handle
-2025-10-28T14:29:36.055Z :: Requesting decryption...
-2025-10-28T14:29:36.055Z :: Generating keypair...
-2025-10-28T14:29:36.059Z :: Creating EIP712...
-2025-10-28T14:29:36.060Z :: Sign typed data...
-2025-10-28T14:29:36.068Z :: User decrypt...
-{
-  '0x87b108a987087e1917a5163710ea79247e87cb5b83ff00000000286d6c560400': 4n
-}
-2025-10-28T14:30:00.035Z :: Result: 4
-2025-10-28T14:30:00.035Z :: Decrypted count: 4
-```
-
-#### Your tasks
-
-Implement hardhat tasks for **decrementing** FHE Counter by following and adapting the examples provided for incrementing.

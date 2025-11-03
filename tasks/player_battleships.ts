@@ -57,7 +57,7 @@ task('task:encryptShipPosition')
         )
         timestampLog("Encrypting...")
         const encryptedInput = await (fhevmInstance.createEncryptedInput(contractAddress, wallet.address)
-            .add8(Number(taskArguments.x)).add8(taskArguments.y).encrypt())
+            .add8(Number(taskArguments.x)).add8(Number(taskArguments.y)).encrypt())
         timestampLog("Input encrypted")
         fs.writeFileSync(
             taskArguments.inputFile,
@@ -75,7 +75,7 @@ task('task:encryptShipPosition')
     })
 
 
-task('task:callPlaceShip')
+task('task:callAddGuess')
     .addParam('inputFile', 'File to read encrypted input and zkproof from')
     .addParam('configFile', 'JSON file to read testnet config from')
     .addParam('addressFile', 'File to read address of deployed contract from')

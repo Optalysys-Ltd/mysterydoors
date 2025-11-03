@@ -60,7 +60,7 @@ task('task:adminEncryptShipPosition')
         )
         timestampLog("Encrypting...")
         const encryptedInput = await (fhevmInstance.createEncryptedInput(contractAddress, wallet.address)
-            .add8(Number(taskArguments.x)).add8(taskArguments.y).encrypt())
+            .add8(Number(taskArguments.x)).add8(Number(taskArguments.y)).encrypt())
         timestampLog("Input encrypted")
         fs.writeFileSync(
             taskArguments.inputFile,
@@ -196,4 +196,44 @@ task('task:adminGetShipPositions')
         const dShipPositionsList: Coord[] = eShipPositionsList.map((eShipPosition: Battleships.ECoordStructOutput) => {
             return { x: BigInt(decryptedHandles[eShipPosition.x]) as unknown as number, y: BigInt(decryptedHandles[eShipPosition.y]) as unknown as number };
         }); timestampLog("Decrypted ship positions: " + dShipPositionsList);
+    })
+
+task('task:adminGetPlayersCorrectGuesses')
+    .addParam('configFile', 'JSON file to read testnet config from')
+    .addParam('addressFile', 'File to read address of deployed contract from')
+    .addParam('keyFile', 'Encrypted key to derive user address from')
+    .setAction(async function (taskArguments: TaskArguments, { ethers }) {
+        timestampLog("Loading wallet")
+        const wallet = await loadWallet(taskArguments.keyFile)
+        timestampLog("Loading contract address")
+        const contractAddress = await fs.promises.readFile(taskArguments.addressFile, 'utf8')
+        timestampLog("Loading testnet config")
+        const testnetConfig = await loadTestnetConfig(taskArguments.configFile);
+        timestampLog("Instantiating fhevm instance")
+        const fhevmInstance = await createInstance(
+            testnetConfig.decryptionContractAddress,
+            testnetConfig.inputVerificationContractAddress,
+            testnetConfig.inputVerifierContractAddress,
+            testnetConfig.kmsVerifierContractAddress,
+            testnetConfig.aclContractAddress,
+            testnetConfig.gatewayChainId,
+            testnetConfig.relayerUrl,
+            testnetConfig.jsonRpcUrl,
+        )
+        timestampLog("Connecting wallet")
+        const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl)) as HDNodeWallet;
+        timestampLog("Connecting to contract")
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        timestampLog("Calling getPlayersCorrectGuesses on contract to get ciphertext handles")
+        const [playersList, ePlayerCorrectGuessesList] = await contract.connect(connectedWallet).getPlayersCorrectGuesses();
+        timestampLog("Decrypting handles ePlayerCorrectGuesses");
+        const result = await setupUserDecrypt(fhevmInstance, connectedWallet, ePlayerCorrectGuessesList, contractAddress);
+        timestampLog("Result:");
+        const playerNumCorrectGuesses: Record<string, bigint> = {};
+        let handleIndex = 0;
+        for (const key in result) {
+            playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint;
+            handleIndex++;
+        }
+        console.log(playerNumCorrectGuesses);
     })
