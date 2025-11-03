@@ -26,7 +26,6 @@ contract Battleships is Ownable2Step {
     euint8 private immutable _EUINT8_ONE;
     bool public gameStarted;
     bool public gameOver;
-    Coord[] public decryptedShipPositions; // TODO: encrypt shipPositions
     ECoord[] private shipPositions;
     mapping(address => ECoord[]) private playerGuesses;
     mapping(address => euint8) private playerCorrectGuesses;
@@ -57,6 +56,14 @@ contract Battleships is Ownable2Step {
         ePlayerCorrectGuessesList = new euint8[](players.length);
         for (uint256 i = 0; i < players.length; i++) {
             ePlayerCorrectGuessesList[i] = playerCorrectGuesses[players[i]];
+            FHE.allowThis(ePlayerCorrectGuessesList[i]);
+            FHE.allow(ePlayerCorrectGuessesList[i], msg.sender);
+        }
+        for (uint256 i = 0; i < shipPositions.length; i++) {
+            euint8 x = shipPositions[i].x;
+            euint8 y = shipPositions[i].y;
+            FHE.makePubliclyDecryptable(x);
+            FHE.makePubliclyDecryptable(y);
         }
     }
 
@@ -135,7 +142,6 @@ contract Battleships is Ownable2Step {
             );
             FHE.allowThis(playerCorrectGuesses[msg.sender]);
             FHE.allow(playerCorrectGuesses[msg.sender], msg.sender);
-            FHE.makePubliclyDecryptable(playerCorrectGuesses[msg.sender]);
         }
     }
 
@@ -145,6 +151,11 @@ contract Battleships is Ownable2Step {
 
     function getCorrectGuesses() public view returns (euint8) {
         return playerCorrectGuesses[msg.sender];
+    }
+
+    function getShipPositions() public view returns (ECoord[] memory) {
+        require(gameOver, "The game has not ended yet.");
+        return shipPositions;
     }
 
 }

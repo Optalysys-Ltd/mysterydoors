@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { ethers, fhevm as mockFhevm } from "hardhat";
 import { createInstance, loadTestnetConfig, loadWallet, timestampLog } from "../tasks/utils";
 import { JsonRpcProvider, HDNodeWallet, Signer } from "ethers";
-import { FhevmInstance } from "@zama-fhe/relayer-sdk/node";
+import { DecryptedResults, FhevmInstance } from "@zama-fhe/relayer-sdk/node";
 import { HardhatFhevmRuntimeEnvironment, FhevmType } from "@fhevm/hardhat-plugin";
 import { Battleships, Battleships__factory } from "../typechain-types";
 
@@ -84,7 +84,7 @@ async function deployFixture() {
   return { battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm };
 }
 
-async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWallet, ciphertextHandle: string, contractAddress: string): Promise<string | bigint | boolean> {
+async function setupUserDecrypt(instance: HardhatFhevmRuntimeEnvironment, signer: HDNodeWallet, ciphertextHandles: string[], contractAddress: string): Promise<DecryptedResults> {
   // instance: [`FhevmInstance`] from `zama-fhe/relayer-sdk`
   // signer: [`Signer`] from ethers (could a [`Wallet`])
   // ciphertextHandle: [`string`]
@@ -93,12 +93,12 @@ async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWallet, c
   timestampLog("Generating keypair...")
 
   const keypair = instance.generateKeypair();
-  const handleContractPairs = [
-    {
+  const handleContractPairs = ciphertextHandles.map((ciphertextHandle) => {
+    return {
       handle: ciphertextHandle,
       contractAddress: contractAddress,
-    },
-  ];
+    };
+  });
   const startTimeStamp = Math.floor(Date.now() / 1000).toString();
   const durationDays = '10'; // String for consistency
   const contractAddresses = [contractAddress];
@@ -111,7 +111,7 @@ async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWallet, c
     durationDays,
   );
 
-  timestampLog("Sign typed data...")
+  timestampLog(`Signer ${signer.address} sign typed data...`)
 
   const signature = await signer.signTypedData(
     eip712.domain,
@@ -133,11 +133,7 @@ async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWallet, c
     startTimeStamp,
     durationDays,
   );
-  console.log(result);
-
-  const decryptedValue = result[ciphertextHandle];
-  timestampLog("Result: " + decryptedValue);
-  return decryptedValue;
+  return result;
 }
 
 describe("Battleships", function () {
@@ -147,6 +143,7 @@ describe("Battleships", function () {
   let wallet: HDNodeWallet;
   let fhevm: HardhatFhevmRuntimeEnvironment;
   let walletAddress: string;
+  let initShipPositions: Coord[];
 
 
   before(async function () {
@@ -157,7 +154,7 @@ describe("Battleships", function () {
 
   beforeEach(async () => {
     ({ battleshipsContract, battleshipsContractAddress, wallet, walletAddress, fhevm } = await deployFixture());
-    const initShipPositions: Coord[] = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }];
+    initShipPositions = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }];
     for (let i = 0; i < initShipPositions.length; i++) {
       const initShipPosition = initShipPositions[i];
       const input = fhevm.createEncryptedInput(battleshipsContractAddress, walletAddress);
@@ -240,7 +237,7 @@ describe("Battleships", function () {
 
   });
 
-  it("Multi players", async () => {
+  it("Multi players and their winning guesses", async () => {
     type Turn = {
       x: number;
       y: number;
@@ -290,18 +287,42 @@ describe("Battleships", function () {
 
     await battleshipsContract.connect(signers.deployer).endGame();
     const [playersList, ePlayerCorrectGuessesList] = await battleshipsContract.connect(signers.deployer).getPlayersCorrectGuesses();
-    const result = await fhevm.publicDecrypt(ePlayerCorrectGuessesList);
+    const result = await setupUserDecrypt(fhevm, wallet, ePlayerCorrectGuessesList, battleshipsContractAddress);
     timestampLog("Result:");
     const playerNumCorrectGuesses: Record<string, bigint> = {};
     let handleIndex = 0;
     for (const key in result) {
-      console.log(key, result[key]);
       playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint;
       handleIndex++;
     }
     expect(Object.keys(playerNumCorrectGuesses).length).to.eq(playersList.length);
     console.log(playerNumCorrectGuesses);
-    expect(true).to.eq(false);
+    expect(playerNumCorrectGuesses[playersList[0]]).to.eq(3);
+    expect(playerNumCorrectGuesses[playersList[1]]).to.eq(2);
+  });
+
+  it("Ship positions should not be publicly decryptable before the game ends", async () => {
+    await expect(battleshipsContract.connect(signers.bob).getShipPositions()).to.be.revertedWith("The game has not ended yet.");
+    await expect(battleshipsContract.connect(signers.deployer).endGame()).to.not.be.reverted;
+    await expect(battleshipsContract.connect(signers.bob).getShipPositions()).to.not.be.reverted;
+  });
+
+  it("Ship positions should be publicly decryptable after the game ends", async () => {
+    await expect(battleshipsContract.connect(signers.bob).getShipPositions()).to.be.revertedWith("The game has not ended yet.");
+    await expect(battleshipsContract.connect(signers.deployer).endGame()).to.not.be.reverted;
+
+    const eShipPositionsList = await battleshipsContract.connect(signers.bob).getShipPositions();
+    const handles = eShipPositionsList.reduce((handles: string[], eShipPosition: Battleships.ECoordStructOutput) => {
+      handles.push(eShipPosition.x);
+      handles.push(eShipPosition.y);
+      return handles;
+    }, []);
+    const decryptedHandles = await fhevm.publicDecrypt(handles);
+    const dShipPositionsList: Coord[] = eShipPositionsList.map((eShipPosition: Battleships.ECoordStructOutput) => {
+      return { x: BigInt(decryptedHandles[eShipPosition.x]) as unknown as number, y: BigInt(decryptedHandles[eShipPosition.y]) as unknown as number };
+    });
+    expect(dShipPositionsList).to.deep.eq(initShipPositions);
+
   });
 });
 
