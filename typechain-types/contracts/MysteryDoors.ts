@@ -29,7 +29,6 @@ export interface MysteryDoorsInterface extends Interface {
       | "MAX_GUESSES"
       | "MAX_PLAYERS"
       | "acceptOwnership"
-      | "collateLeaderboard"
       | "ePlayerCorrectGuessesList"
       | "endGame"
       | "gameOver"
@@ -65,10 +64,6 @@ export interface MysteryDoorsInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "acceptOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "collateLeaderboard",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -143,10 +138,6 @@ export interface MysteryDoorsInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "acceptOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "collateLeaderboard",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -281,8 +272,6 @@ export interface MysteryDoors extends BaseContract {
 
   acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
-  collateLeaderboard: TypedContractMethod<[], [void], "nonpayable">;
-
   ePlayerCorrectGuessesList: TypedContractMethod<
     [arg0: BigNumberish],
     [string],
@@ -367,9 +356,6 @@ export interface MysteryDoors extends BaseContract {
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "acceptOwnership"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "collateLeaderboard"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "ePlayerCorrectGuessesList"

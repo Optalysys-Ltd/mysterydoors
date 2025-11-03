@@ -182,7 +182,11 @@ task('task:getGuesses')
         timestampLog("Calling getGuesses on contract to get ciphertext handles")
         const ePlayerGuesses = await contract.getGuesses();
         timestampLog("Requesting decryption...")
-        const dPlayerGuessesList = await setupUserDecrypt(fhevmInstance, connectedWallet, ePlayerGuesses, contractAddress);
+        const dPlayerGuesses = await setupUserDecrypt(fhevmInstance, connectedWallet, ePlayerGuesses, contractAddress);
+        const dPlayerGuessesList: number[] = [];
+        for (let key in dPlayerGuesses) {
+            dPlayerGuessesList.push(dPlayerGuesses[key] as bigint as unknown as number);
+        }
         timestampLog("Decrypted player guesses: ");
         console.log(dPlayerGuessesList);
     })

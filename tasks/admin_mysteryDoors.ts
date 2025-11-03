@@ -232,16 +232,24 @@ task('task:adminGetLeaderboard')
         const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl)) as HDNodeWallet;
         timestampLog("Connecting to contract")
         const contract = new MysteryDoors__factory(connectedWallet).attach(contractAddress) as MysteryDoors
+/*         timestampLog("Calling collateLeaderBoard on contract")
+        await contract.connect(connectedWallet).collateLeaderboard(); */
         timestampLog("Calling getPlayersCorrectGuesses on contract to get ciphertext handles")
         const [playersList, ePlayerCorrectGuessesList] = await contract.connect(connectedWallet).getPlayersCorrectGuesses();
         timestampLog("Decrypting handles ePlayerCorrectGuesses");
-        const result = await setupUserDecrypt(fhevmInstance, connectedWallet, ePlayerCorrectGuessesList, contractAddress);
-        timestampLog("Result:");
-        const playerNumCorrectGuesses: Record<string, number> = {};
-        let handleIndex = 0;
-        for (const key in result) {
-            playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint as unknown as number;
-            handleIndex++;
+        console.log(ePlayerCorrectGuessesList);
+        if (ePlayerCorrectGuessesList.length > 0) {
+            const result = await setupUserDecrypt(fhevmInstance, connectedWallet, ePlayerCorrectGuessesList, contractAddress);
+            timestampLog("Result:");
+            const playerNumCorrectGuesses: Record<string, number> = {};
+            let handleIndex = 0;
+            for (const key in result) {
+                playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint as unknown as number;
+                handleIndex++;
+            }
+            console.log(playerNumCorrectGuesses);
         }
-        console.log(playerNumCorrectGuesses);
+        else {
+            timestampLog("No players yet!");
+        }
     })

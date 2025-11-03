@@ -10,6 +10,7 @@ contract MysteryDoors is Ownable2Step {
     uint public numPlayers;
     mapping(address => string) public playerNames;
     address[] public playersList;
+    string[] public playerNamesList;
     euint8[] public ePlayerCorrectGuessesList;
     /// @notice Constant for zero using TFHE.
     /// @dev    Since it is expensive to compute 0, it is stored instead.
@@ -43,7 +44,9 @@ contract MysteryDoors is Ownable2Step {
 
     function collateLeaderboard() public onlyOwner {
         ePlayerCorrectGuessesList = new euint8[](playersList.length);
+        playerNamesList = new string[](playersList.length);
         for (uint256 i = 0; i < playersList.length; i++) {
+            playerNamesList[i] = playerNames[playersList[i]];
             ePlayerCorrectGuessesList[i] = playerCorrectGuesses[playersList[i]];
             FHE.allowThis(ePlayerCorrectGuessesList[i]);
             FHE.allow(ePlayerCorrectGuessesList[i], msg.sender);
@@ -61,7 +64,12 @@ contract MysteryDoors is Ownable2Step {
     function endGame() external onlyOwner {
         require(gameStarted, "The game has not yet started.");
         gameOver = true;
-        collateLeaderboard();
+        ePlayerCorrectGuessesList = new euint8[](playersList.length);
+        for (uint256 i = 0; i < playersList.length; i++) {
+            ePlayerCorrectGuessesList[i] = playerCorrectGuesses[playersList[i]];
+            FHE.allowThis(ePlayerCorrectGuessesList[i]);
+            FHE.allow(ePlayerCorrectGuessesList[i], msg.sender);
+        }
         for (uint256 i = 0; i < occupiedPositions.length; i++) {
             FHE.makePubliclyDecryptable(occupiedPositions[i]);
         }
@@ -69,6 +77,7 @@ contract MysteryDoors is Ownable2Step {
 
     function startGame() public onlyOwner {
         require(!gameStarted, "The game has already started.");
+        require(occupiedPositions.length > 0, "The occupied positions haven't been set!");
         gameStarted = true;
         gameOver = false;
     }

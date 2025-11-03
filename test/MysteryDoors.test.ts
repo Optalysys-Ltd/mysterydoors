@@ -147,6 +147,21 @@ describe("MysteryDoors", function () {
     await mysteryDoorsContract.startGame();
   });
 
+  it("Leaderboard with no players", async () => {
+    const [playersList, ePlayerCorrectGuessesList] = await mysteryDoorsContract.connect(signers.deployer).getPlayersCorrectGuesses();
+    expect(ePlayerCorrectGuessesList).to.have.length(0);
+    expect(playersList).to.have.length(0);
+    const result = await setupUserDecrypt(fhevm, wallet, ePlayerCorrectGuessesList, mysteryDoorsContractAddress);
+
+    const playerNumCorrectGuesses: Record<string, number> = {};
+    let handleIndex = 0;
+    for (const key in result) {
+      playerNumCorrectGuesses[playersList[handleIndex]] = result[key] as bigint as unknown as number;
+      handleIndex++;
+    }
+    console.log(playerNumCorrectGuesses);
+  });
+
   it("Player needs to have joined the game", async () => {
     const positionGuesses = [17, 4, 2, 21, 6];
 
@@ -317,5 +332,41 @@ describe("MysteryDoors before game start", function () {
   });
 
 
+  describe("MysteryDoors no init", function () {
+    let signers: Signers;
+    let mysteryDoorsContract: MysteryDoors;
+    let mysteryDoorsContractAddress: string;
+    let wallet: HDNodeWallet;
+    let fhevm: HardhatFhevmRuntimeEnvironment;
+    let walletAddress: string;
 
+
+    before(async function () {
+      const ethSigners: HardhatEthersSigner[] = await ethers.getSigners();
+      signers = { deployer: ethSigners[0], alice: ethSigners[1], bob: ethSigners[2] };
+    });
+
+    beforeEach(async () => {
+      ({ mysteryDoorsContract, mysteryDoorsContractAddress, wallet, walletAddress, fhevm } = await deployFixture());
+
+    });
+
+    it("The game can only be started when the occupied positions are set", async () => {
+      await expect(mysteryDoorsContract.connect(signers.deployer).startGame()).to.be.revertedWith("The occupied positions haven't been set!");
+      const occupiedPositions = [24, 23, 22, 17, 12]; // L
+
+      const input = fhevm.createEncryptedInput(mysteryDoorsContractAddress, walletAddress);
+      input.add8(occupiedPositions[0]);
+      input.add8(occupiedPositions[1]);
+      input.add8(occupiedPositions[2]);
+      input.add8(occupiedPositions[3]);
+      input.add8(occupiedPositions[4]);
+      const encryptedInput = await input.encrypt();
+      await mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
+
+      await expect(mysteryDoorsContract.connect(signers.deployer).startGame()).to.not.be.reverted;
+
+    });
+
+  });
 });

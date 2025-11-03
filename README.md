@@ -207,6 +207,23 @@ pnpm hardhat task:adminGetOccupiedPositions --config-file testnet_config.json --
 [ 24n, 23n, 22n, 17n, 12n ]
 ```
 
+### Admin: Get leaderboard
+
+```bash
+pnpm hardhat task:adminGetLeaderboard --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-03T19:31:04.650Z :: Calling getPlayersCorrectGuesses on contract to get ciphertext handles
+2025-11-03T19:31:04.945Z :: Decrypting handles ePlayerCorrectGuesses
+2025-11-03T19:31:04.946Z :: Generating keypair...
+2025-11-03T19:31:04.953Z :: Creating EIP712...
+2025-11-03T19:31:04.953Z :: Signer 0xFE9eDed1fAC8183430cCF197613859A3E3EC9E72 sign typed data...
+2025-11-03T19:31:04.961Z :: User decrypt...
+2025-11-03T19:31:14.493Z :: Result:
+{
+  '0x2dEd2BE82980D66F871A1bc5Af8dB3ae55ce9ce9': 2n,
+  '0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416': 1n
+}
+```
+
 ## Player
 You need to join the game by supplying your name. The player has a maximum of 5 guesses. When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
 
@@ -269,11 +286,19 @@ pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-
 To see the guesses you have submitted:
 
 ```bash
- pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json 
+pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file bob.json 
+2025-11-03T19:24:21.700Z :: Calling getGuesses on contract to get ciphertext handles
+2025-11-03T19:24:21.989Z :: Requesting decryption...
+2025-11-03T19:24:21.989Z :: Generating keypair...
+2025-11-03T19:24:21.995Z :: Creating EIP712...
+2025-11-03T19:24:21.996Z :: Signer 0x2dEd2BE82980D66F871A1bc5Af8dB3ae55ce9ce9 sign typed data...
+2025-11-03T19:24:22.002Z :: User decrypt...
+2025-11-03T19:24:32.552Z :: Decrypted player guesses: 
+[ 10n, 16n, 23n, 22n, 21n ]
 ```
 
-### Player: Get ship positions and decrypt them when the game ends
-When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
+### Player: Get occupied positions and decrypt them when the game ends
+When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the occupied positions.
 
 ```bash
 pnpm hardhat task:getOccupiedPositions --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
