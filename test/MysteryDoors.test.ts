@@ -27,7 +27,7 @@ async function deployFixture() {
   let walletAddress: string;
   let fhevm: HardhatFhevmRuntimeEnvironment;
   timestampLog("Network name: " + networkName);
-  const configFile = networkName == "optalysys" ? "testnet_config.json" : "mocked_config.json";
+  const configFile = "mocked_config.json";
   if (networkName !== "hardhat") {
     throw new Error("Can only be run on hardhat")
   } else {

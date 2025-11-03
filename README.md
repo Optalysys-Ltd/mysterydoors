@@ -127,57 +127,56 @@ Save this file in the root directory of the container you are using as your exec
 
 ## Admin
 
-### Admin: Deploy Battleships contract
+### Admin: Deploy MysteryDoors contract
 
 The hardhat tasks (prefixed by `task:`) are defined in the folder `tasks/`. The network config file are the config details to connect to the testnet, so there's no need to pass the `--network` param to hardhat (anyway, hardhat doesn't support custom network names).
 
 This deploys a simple contract to the testnet using the account and config you created in the previous steps. The contract is in the file `contracts/Simple.sol`. It demonstrates encrypting a uint8, and two uint8s, and public decryption. The deployed contract address is written to the file `test_contract.address`.
 
 ```bash
-pnpm hardhat task:adminDeployBattleships --config-file testnet_config.json --address-file battleships.address --key-file deployer.json
-2025-11-03T11:30:25.843Z :: Deploying contract
-2025-11-03T11:30:28.369Z :: Waiting for deployment...
-2025-11-03T11:30:33.838Z :: Contract deployed at block: 181668
-2025-11-03T11:30:33.838Z :: Contract address: 0x335803361FB6FdC13dF87B9eDC95B7dAB8CB075C
-2025-11-03T11:30:33.839Z :: Contract address written to file: battleships.address
+pnpm hardhat task:adminDeployMysteryDoors --config-file testnet_config.json  --address-file mysterydoors.address --key-file deployer.json 
+2025-11-03T17:20:43.518Z :: Deploying contract
+2025-11-03T17:20:46.119Z :: Waiting for deployment...
+2025-11-03T17:20:51.437Z :: Contract deployed at block: 185171
+2025-11-03T17:20:51.438Z :: Contract address: 0x883BC1E920b31e5a3f2dA3ABaDA7FA4dd409E189
+2025-11-03T17:20:51.438Z :: Contract address written to file: mysterydoors.address
 ```
 
-### Admin: Encrypt a ship position (two uint8s) and call placeShip with the encrypted values
+### Admin: Encrypt 5 occupied positions (uint8s) and call markOccupied with the encrypted values
 
-As a first test we will encrypt an unsigned 8-bit integer, store it on the contract, then request its decryption.
 
-#### Encrypt two Unsigned 8-bit Integers
+#### Encrypt 5 Unsigned 8-bit Integers
 
-This will fetch the URLs of the public keys from the relayer, then fetch the public keys from those URLs, use the public key to encrypt the input and then generate a zero-knowledge proof that we know the plaintext value for this ciphertext. The ciphertext and zkproof will be stored in a file `encrypted_input.json` so we can use them in following steps.
+This will fetch the URLs of the public keys from the relayer, then fetch the public keys from those URLs, use the public key to encrypt the input and then generate a zero-knowledge proof that we know the plaintext value for this ciphertext. The ciphertext and zkproof will be stored in a file `input.json` so we can use them in following steps.
 
 ```bash
-pnpm hardhat task:adminEncryptShipPosition --x 4 --y 4 --input-file eShipPosition.json --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
-2025-11-03T11:45:02.933Z :: Encrypting...
-2025-11-03T11:46:57.067Z :: Input encrypted
-2025-11-03T11:46:57.068Z :: Encrypted input and ZK proof written to: eShipPosition.json
+pnpm hardhat task:adminEncryptOccupiedPositions --input-file inputs.json --config-file testnet_config.json  --address-file mysterydoors.address --key-file deployer.json --p1 24 --p2 23 --p3 22 --p4 17 --p5 12  
+2025-11-03T17:28:46.885Z :: Encrypting...
+2025-11-03T17:30:02.998Z :: Input encrypted
+2025-11-03T17:30:02.999Z :: Encrypted input and ZK proof written to: inputs.json
 ```
 
-#### Call placeShip with the encrypted inputs
+#### Call markOccupied with the encrypted inputs
 
-Now that the coprocessors know about the ciphertext (from the previous action) and have returned an attestation of the zkproof, we can store the ciphertext (actually a "handle" that the coprocessors know references that ciphertext) from `eShipPosition.json` on our contract on the blockchain.
+Now that the coprocessors know about the ciphertext (from the previous action) and have returned an attestation of the zkproof, we can store the ciphertext (actually a "handle" that the coprocessors know references that ciphertext) from `inputs.json` on our contract on the blockchain.
 
 ```bash
-pnpm hardhat task:adminCallPlaceShip --input-file eShipPosition.json --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
-2025-11-03T11:48:16.566Z :: Calling placeShip on contract
-2025-11-03T11:48:18.763Z :: Transaction hash: 0xb833ffaf216b9107e53dfd41c093330734780e867d60f8c16e1091d213f654dc
-2025-11-03T11:48:18.763Z :: Waiting for transaction to be included in block...
-2025-11-03T11:48:28.212Z :: Transaction receipt received. Block number: 181847
+pnpm hardhat task:adminCallMarkOccupied --input-file inputs.json --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-03T17:33:24.721Z :: Calling markOccupied on contract
+2025-11-03T17:33:27.398Z :: Transaction hash: 0x09888e0c5cdd1c368670372e0b99f4462cd505eeeb7e8724fdc165104d05eaf9
+2025-11-03T17:33:27.398Z :: Waiting for transaction to be included in block...
+2025-11-03T17:33:36.610Z :: Transaction receipt received. Block number: 185298
 ```
 
-### Start game
+### Admin: Start game
 Call start game after placing the ships
 
 ```bash
- pnpm hardhat task:adminStartGame --config-file testnet_config.json --address-file battleships.address --key-file deployer.json 
-2025-11-03T11:48:53.244Z :: Calling startGame on contract
-2025-11-03T11:48:55.820Z :: Transaction hash: 0xd22ab6c3caed18fc158bd274f51f480be14c3117aa6a5c89cf7a8d413a22cf4e
-2025-11-03T11:48:55.821Z :: Waiting for transaction to be included in block...
-2025-11-03T11:49:05.129Z :: Transaction receipt received. Block number: 181853
+pnpm hardhat task:adminStartMysteryDoors --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-03T17:34:57.312Z :: Calling startGame on contract
+2025-11-03T17:34:59.765Z :: Transaction hash: 0x18ecdee56076a62679c9ab7886e57e80b92a09fff9dbb314ec79381595f741af
+2025-11-03T17:34:59.765Z :: Waiting for transaction to be included in block...
+2025-11-03T17:35:04.985Z :: Transaction receipt received. Block number: 185313
 ```
 
 
@@ -205,79 +204,67 @@ You need to join the game by supplying your name. The player has a maximum of 5 
 ### Player: Join game
 
 ```bash
-pnpm hardhat task:joinGame --name Alice --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
-2025-11-03T11:49:54.419Z :: Calling joinGame on contract with name Alice
-2025-11-03T11:49:56.845Z :: Transaction hash: 0xbbb44ab199c2498d714332392756177c07abd3bf03e0707c2ceb3e9852e34eea
-2025-11-03T11:49:56.845Z :: Waiting for transaction to be included in block...
-2025-11-03T11:50:06.258Z :: Transaction receipt received. Block number: 181863
+pnpm hardhat task:joinMysteryDoors --name Alice --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json 
+2025-11-03T17:36:07.628Z :: Calling joinGame on contract with name Alice
+2025-11-03T17:36:10.123Z :: Transaction hash: 0xeea24c71f414cd728c258cddd99e846702557d11ac6c4fd3c4bba1fdb22ab710
+2025-11-03T17:36:10.123Z :: Waiting for transaction to be included in block...
+2025-11-03T17:36:15.338Z :: Transaction receipt received. Block number: 185325
 ```
 
-### Player: Encrypt ship position guess (two uint8s)
-The guess is encrypted into the file `p1_e.json`
+### Player: Encrypt 5 position (uint8) guesses
+The guesses are encrypted into the file `alice_inputs.json`
 
 ```bash
-pnpm hardhat task:encryptShipPosition --x 0 --y 0 --input-file p1_e.json --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
-2025-11-03T11:51:05.654Z :: Encrypting...
-2025-11-03T11:53:03.009Z :: Input encrypted
-2025-11-03T11:53:03.010Z :: Encrypted input and ZK proof written to: p1_e.json
+pnpm hardhat task:encryptOccupiedGuesses --input-file alice_inputs.json --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json --p1 17 --p2 4 --p3 2 --p4 21 --p5 6
+2025-11-03T17:39:05.328Z :: Encrypting...
+2025-11-03T17:41:51.137Z :: Input encrypted
+2025-11-03T17:41:51.138Z :: Encrypted input and ZK proof written to: alice_inputs.json
 ```
 
-### Player: Call addGuess with the encrypted inputs
-The encrypted guess is read from the input file `p1_e.json`
+
+### Player: Call makeGuesses with the encrypted inputs
+The encrypted guess is read from the input file `alice_inputs.json`
 
 ```bash
-pnpm hardhat task:callAddGuess --input-file p1_e.json --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
-2025-11-03T11:55:17.344Z :: Calling addGuess contract
-2025-11-03T11:55:19.498Z :: Transaction hash: 0x0594ff0b69ba64826660ea5ba1055735cf95138aabd947f91a3656b071d59144
-2025-11-03T11:55:19.498Z :: Waiting for transaction to be included in block...
-2025-11-03T11:55:28.705Z :: Transaction receipt received. Block number: 181917
+pnpm hardhat task:callMakeGuesses --input-file alice_inputs.json --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
+2025-11-03T17:42:47.078Z :: Loading wallet
+Set WALLET_PASSWORD env var to skip this prompt
+Enter password for wallet: 
+2025-11-03T17:42:51.077Z :: Loading contract address
+2025-11-03T17:42:51.078Z :: Loading testnet config
+2025-11-03T17:42:51.079Z :: Loading encrypted input and zkproof
+2025-11-03T17:42:51.080Z :: Connecting wallet
+2025-11-03T17:42:51.102Z :: Connecting to contract
+2025-11-03T17:42:51.109Z :: Calling makeGuesses contract
+2025-11-03T17:42:53.388Z :: Transaction hash: 0xd177b90e3532d27a3ad0ccc6ce2f47228cf98a3ed0fc004a865475d49d5cfd2f
+2025-11-03T17:42:53.388Z :: Waiting for transaction to be included in block...
+2025-11-03T17:42:58.503Z :: Transaction receipt received. Block number: 185392
 ```
 
 ### Player: Get the number of correct guesses
-By keeping track of the previous number of correct guesses and the latest number of correct guesses, the player can infer whether their guess is a hit.
+After they have made their guesses, the player can get the number of correct guesses.
 
-First call:
 ```bash
-pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
-2025-11-03T11:56:08.111Z :: Calling getCorrectGuesses on contract
-2025-11-03T11:56:08.333Z :: Requesting decryption...
-2025-11-03T11:56:08.334Z :: Generating keypair...
-2025-11-03T11:56:08.341Z :: Creating EIP712...
-2025-11-03T11:56:08.342Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
-2025-11-03T11:56:08.349Z :: User decrypt...
-2025-11-03T11:56:56.584Z :: Decrypted number of correct guesses: 0
+pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
+2025-11-03T17:44:07.756Z :: Calling getCorrectGuesses on contract
+2025-11-03T17:44:08.012Z :: Requesting decryption...
+2025-11-03T17:44:08.013Z :: Generating keypair...
+2025-11-03T17:44:08.020Z :: Creating EIP712...
+2025-11-03T17:44:08.021Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-03T17:44:08.032Z :: User decrypt...
 ```
 
-Calling it again:
-```bash
-pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
-2025-11-03T12:02:14.819Z :: Calling getCorrectGuesses on contract
-2025-11-03T12:02:15.035Z :: Requesting decryption...
-2025-11-03T12:02:15.036Z :: Generating keypair...
-2025-11-03T12:02:15.044Z :: Creating EIP712...
-2025-11-03T12:02:15.045Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
-2025-11-03T12:02:15.055Z :: User decrypt...
-2025-11-03T12:02:26.683Z :: Decrypted number of correct guesses: 1
-```
 
 ### Player: Decrypt your guesses
-To see what guesses you have made so far:
+To see the guesses you have submitted:
 
 ```bash
-pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
-2025-11-03T13:07:04.425Z :: Calling getGuesses on contract to get ciphertext handles
-2025-11-03T13:07:04.698Z :: Requesting decryption...
-2025-11-03T13:07:04.699Z :: Generating keypair...
-2025-11-03T13:07:04.709Z :: Creating EIP712...
-2025-11-03T13:07:04.710Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
-2025-11-03T13:07:04.722Z :: User decrypt...
-2025-11-03T13:07:14.474Z :: Decrypted player guesses: 
-[ { x: 0n, y: 0n }, { x: 3n, y: 3n } ]
+ pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json 
 ```
 
-### Player: Get ship positions and decrypt them
+### Player: Get ship positions and decrypt them when the game ends
 When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
 
 ```bash
- pnpm hardhat task:getShipPositions --config-file testnet_config.json --address-file battleships.address --key-file player1.json 
+ pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json 
 ```
