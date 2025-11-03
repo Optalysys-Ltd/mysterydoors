@@ -5,6 +5,30 @@ import { loadWallet, timestampLog, loadTestnetConfig, createInstance, setupUserD
 import { Battleships, Battleships__factory } from "../typechain-types";
 import { HDNodeWallet } from "ethers";
 
+task('task:joinGame')
+    .addParam('name', 'Your name to identify you in the Battleships game')
+    .addParam('configFile', 'JSON file to read testnet config from')
+    .addParam('addressFile', 'File to read address of deployed contract from')
+    .addParam('keyFile', 'Encrypted key to derive user address from')
+    .setAction(async function (taskArguments: TaskArguments, { ethers }) {
+        timestampLog("Loading wallet")
+        const wallet = await loadWallet(taskArguments.keyFile)
+        timestampLog("Loading contract address")
+        const contractAddress = await fs.promises.readFile(taskArguments.addressFile, 'utf8')
+        timestampLog("Loading testnet config")
+        const testnetConfig = await loadTestnetConfig(taskArguments.configFile);
+        timestampLog("Connecting wallet")
+        const connectedWallet = wallet.connect(ethers.getDefaultProvider(testnetConfig.jsonRpcUrl))
+        timestampLog("Connecting to contract")
+        const contract = new Battleships__factory(connectedWallet).attach(contractAddress) as Battleships
+        const playerName = taskArguments.name;
+        timestampLog(`Calling joinGame on contract with name ${playerName}`);
+        const txResponse = await contract.joinGame(playerName);
+        timestampLog("Transaction hash: " + txResponse.hash)
+        timestampLog("Waiting for transaction to be included in block...")
+        const txReceipt = await txResponse.wait()
+        timestampLog("Transaction receipt received. Block number: " + txReceipt?.blockNumber)
+    });
 
 task('task:encryptShipPosition')
     .addParam('x', 'x coordinate of ship')
