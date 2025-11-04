@@ -147,10 +147,14 @@ task('task:getCorrectGuesses')
         const contract = new MysteryDoors__factory(connectedWallet).attach(contractAddress) as MysteryDoors
         timestampLog("Calling getCorrectGuesses on contract")
         const eCorrectGuesses = await contract.getCorrectGuesses();
+        if (eCorrectGuesses == ethers.ZeroHash) {
+            throw new Error("The handle hasn't been initialized yet!")
+        } else {
         timestampLog("Requesting decryption...")
         const decryptedHandles = await setupUserDecrypt(fhevmInstance, connectedWallet, [eCorrectGuesses], contractAddress);
         const correctGuesses = decryptedHandles[eCorrectGuesses];
         timestampLog(`Decrypted number of correct guesses: ${correctGuesses}`);
+        }
     });
 
 task('task:getGuesses')
@@ -224,7 +228,7 @@ task('task:getOccupiedPositions')
         const dOccupiedPositions: number[] = [];
         for (let key in decryptedHandles) {
             const decryptedValue = decryptedHandles[key];
-            dOccupiedPositions.push(decryptedValue as unknown as number);
+            dOccupiedPositions.push(decryptedValue as bigint as unknown as number);
         }
         timestampLog("Decrypted occupied positions: ");
         console.log(dOccupiedPositions);

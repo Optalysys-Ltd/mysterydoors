@@ -92,7 +92,12 @@ contract MysteryDoors is Ownable2Step {
             numPlayers < MAX_PLAYERS,
             "The game is full. Please try again later."
         );
+        require(
+            bytes(playerNames[msg.sender]).length == 0,
+            "You have already joined the game!"
+        );
         playerNames[msg.sender] = name;
+        playerCorrectGuesses[msg.sender] = _EUINT8_ZERO;
         playersList.push(msg.sender);
         numPlayers++;
     }

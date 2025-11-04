@@ -200,7 +200,7 @@ task('task:adminGetOccupiedPositions')
         const dOccupiedPositions: number[] = [];
         for (let key in decryptedHandles) {
             const decryptedValue = decryptedHandles[key];
-            dOccupiedPositions.push(decryptedValue as unknown as number);
+            dOccupiedPositions.push(decryptedValue as bigint as unknown as number);
         }
         timestampLog("Decrypted occupied positions: ");
         console.log(dOccupiedPositions);
@@ -237,7 +237,6 @@ task('task:adminGetLeaderboard')
         timestampLog("Calling getPlayersCorrectGuesses on contract to get ciphertext handles")
         const [playersList, ePlayerCorrectGuessesList, playerNamesList] = await contract.connect(connectedWallet).getPlayersCorrectGuesses();
         timestampLog("Decrypting handles ePlayerCorrectGuesses");
-        console.log(ePlayerCorrectGuessesList);
         if (ePlayerCorrectGuessesList.length > 0) {
             const result = await setupUserDecrypt(fhevmInstance, connectedWallet, ePlayerCorrectGuessesList, contractAddress);
             timestampLog("Result:");

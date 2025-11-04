@@ -135,11 +135,11 @@ This deploys a simple contract to the testnet using the account and config you c
 
 ```bash
 pnpm hardhat task:adminDeployMysteryDoors --config-file testnet_config.json  --address-file mysterydoors.address --key-file deployer.json 
-2025-11-03T17:20:43.518Z :: Deploying contract
-2025-11-03T17:20:46.119Z :: Waiting for deployment...
-2025-11-03T17:20:51.437Z :: Contract deployed at block: 185171
-2025-11-03T17:20:51.438Z :: Contract address: 0x883BC1E920b31e5a3f2dA3ABaDA7FA4dd409E189
-2025-11-03T17:20:51.438Z :: Contract address written to file: mysterydoors.address
+2025-11-04T10:43:09.034Z :: Deploying contract
+2025-11-04T10:43:11.654Z :: Waiting for deployment...
+2025-11-04T10:43:20.874Z :: Contract deployed at block: 195596
+2025-11-04T10:43:20.875Z :: Contract address: 0x19695d31d9689C0673181B1a2c76F356204e119a
+2025-11-04T10:43:20.876Z :: Contract address written to file: mysterydoors.address
 ```
 
 ### Admin: Encrypt 5 occupied positions (uint8s) and call markOccupied with the encrypted values
@@ -150,10 +150,10 @@ pnpm hardhat task:adminDeployMysteryDoors --config-file testnet_config.json  --a
 This will fetch the URLs of the public keys from the relayer, then fetch the public keys from those URLs, use the public key to encrypt the input and then generate a zero-knowledge proof that we know the plaintext value for this ciphertext. The ciphertext and zkproof will be stored in a file `input.json` so we can use them in following steps.
 
 ```bash
-pnpm hardhat task:adminEncryptOccupiedPositions --input-file inputs.json --config-file testnet_config.json  --address-file mysterydoors.address --key-file deployer.json --p1 24 --p2 23 --p3 22 --p4 17 --p5 12  
-2025-11-03T17:28:46.885Z :: Encrypting...
-2025-11-03T17:30:02.998Z :: Input encrypted
-2025-11-03T17:30:02.999Z :: Encrypted input and ZK proof written to: inputs.json
+pnpm hardhat task:adminEncryptOccupiedPositions --input-file inputs.json --config-file testnet_config.json  --address-file mysterydoors.address --key-file deployer.json --p1 24 --p2 23 --p3 22 --p4 17 --p5 12 
+2025-11-04T10:54:59.522Z :: Encrypting...
+2025-11-04T10:57:01.536Z :: Input encrypted
+2025-11-04T10:57:01.538Z :: Encrypted input and ZK proof written to: inputs.json
 ```
 
 #### Call markOccupied with the encrypted inputs
@@ -162,28 +162,31 @@ Now that the coprocessors know about the ciphertext (from the previous action) a
 
 ```bash
 pnpm hardhat task:adminCallMarkOccupied --input-file inputs.json --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
-2025-11-03T17:33:24.721Z :: Calling markOccupied on contract
-2025-11-03T17:33:27.398Z :: Transaction hash: 0x09888e0c5cdd1c368670372e0b99f4462cd505eeeb7e8724fdc165104d05eaf9
-2025-11-03T17:33:27.398Z :: Waiting for transaction to be included in block...
-2025-11-03T17:33:36.610Z :: Transaction receipt received. Block number: 185298
+2025-11-04T11:04:05.323Z :: Loading encrypted input and zkproof
+2025-11-04T11:04:05.323Z :: Connecting wallet
+2025-11-04T11:04:05.340Z :: Connecting to contract
+2025-11-04T11:04:05.345Z :: Calling markOccupied on contract
+2025-11-04T11:04:07.917Z :: Transaction hash: 0x5f28cdbcc13e8f24dfad823109543c62205ecb8c4fe6f594a767492d05aec217
+2025-11-04T11:04:07.917Z :: Waiting for transaction to be included in block...
+2025-11-04T11:04:17.341Z :: Transaction receipt received. Block number: 195805
 ```
 
 ### Admin: Start game
-Call start game after placing the ships
+Call start game after marking the occupied positions
 
 ```bash
 pnpm hardhat task:adminStartMysteryDoors --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
-2025-11-03T17:34:57.312Z :: Calling startGame on contract
-2025-11-03T17:34:59.765Z :: Transaction hash: 0x18ecdee56076a62679c9ab7886e57e80b92a09fff9dbb314ec79381595f741af
-2025-11-03T17:34:59.765Z :: Waiting for transaction to be included in block...
-2025-11-03T17:35:04.985Z :: Transaction receipt received. Block number: 185313
+2025-11-04T11:05:54.924Z :: Calling startGame on contract
+2025-11-04T11:05:57.276Z :: Transaction hash: 0x7ac62a399096efe16fe5499e141698df2a17eee960886e29247d507b522e7b58
+2025-11-04T11:05:57.276Z :: Waiting for transaction to be included in block...
+2025-11-04T11:06:02.290Z :: Transaction receipt received. Block number: 195823
 ```
 
 
 ### Admin: End game
 Call end game after all players have finished all their turns.
 
-When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
+When the game ends, the contract owner makes the occupied positions publicly decryptable and all players will be able decrypt the occupied positions.
 
 ```bash
 pnpm hardhat task:adminEndMysteryDoors --config-file test
@@ -211,31 +214,53 @@ pnpm hardhat task:adminGetOccupiedPositions --config-file testnet_config.json --
 The leaderboard can be displayed even before the game ends:
 
 ```bash
-pnpm hardhat task:adminGetLeaderboard --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
-2025-11-03T19:31:04.650Z :: Calling getPlayersCorrectGuesses on contract to get ciphertext handles
-2025-11-03T19:31:04.945Z :: Decrypting handles ePlayerCorrectGuesses
-2025-11-03T19:31:04.946Z :: Generating keypair...
-2025-11-03T19:31:04.953Z :: Creating EIP712...
-2025-11-03T19:31:04.953Z :: Signer 0xFE9eDed1fAC8183430cCF197613859A3E3EC9E72 sign typed data...
-2025-11-03T19:31:04.961Z :: User decrypt...
-2025-11-03T19:31:14.493Z :: Result:
+2025-11-04T11:30:34.625Z :: Calling collateLeaderBoard on contract
+2025-11-04T11:30:36.343Z :: Calling getPlayersCorrectGuesses on contract to get ciphertext handles
+2025-11-04T11:30:36.638Z :: Decrypting handles ePlayerCorrectGuesses
+2025-11-04T11:30:36.639Z :: Generating keypair...
+2025-11-04T11:30:36.646Z :: Creating EIP712...
+2025-11-04T11:30:36.646Z :: Signer 0xFE9eDed1fAC8183430cCF197613859A3E3EC9E72 sign typed data...
+2025-11-04T11:30:36.653Z :: User decrypt...
+2025-11-04T11:30:56.631Z :: Result:
 {
-  '0x2dEd2BE82980D66F871A1bc5Af8dB3ae55ce9ce9': 2n,
-  '0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416': 1n
+  '0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416: Alice': 1n,
+  '0x2dEd2BE82980D66F871A1bc5Af8dB3ae55ce9ce9: Bob': 2n
 }
 ```
 
+### Admin: End Game
+The admin can end the game and the leaderboard will be generated, and the occupied positions will be revealed and publicly decryptable.
+
+```bash
+pnpm hardhat task:adminEndMysteryDoors --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-04T11:34:24.301Z :: Calling endGame on contract
+2025-11-04T11:34:26.634Z :: Transaction hash: 0x5f1ab4e38440c20de5f42c2b4e7071b2c7d415984a40cd437414cdde7f7e4560
+2025-11-04T11:34:26.634Z :: Waiting for transaction to be included in block...
+2025-11-04T11:34:35.750Z :: Transaction receipt received. Block number: 196108
+```
+
+### Admin: Reveal occupied positions
+There is an admin command to reveal occupied positions after the game ends.
+
+```bash
+pnpm hardhat task:adminGetOccupiedPositions --config-file testnet_config.json --address-file mysterydoors.address --key-file deployer.json 
+2025-11-04T11:37:26.997Z :: Calling getOccupiedPositions on contract to get ciphertext handles
+2025-11-04T11:37:27.248Z :: Requesting decryption...
+2025-11-04T11:37:38.755Z :: Decrypted occupied positions: 
+[ 24n, 23n, 22n, 17n, 12n ]
+```
+
 ## Player
-You need to join the game by supplying your name. The player has a maximum of 5 guesses. When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the ship positions.
+You need to join the game by supplying your name. The player has a maximum of 5 guesses. When the game ends, the contract owner makes the occupied positions publicly decryptable and all players will be able decrypt the occupied positions.
 
 ### Player: Join game
 
 ```bash
 pnpm hardhat task:joinMysteryDoors --name Alice --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json 
-2025-11-03T17:36:07.628Z :: Calling joinGame on contract with name Alice
-2025-11-03T17:36:10.123Z :: Transaction hash: 0xeea24c71f414cd728c258cddd99e846702557d11ac6c4fd3c4bba1fdb22ab710
-2025-11-03T17:36:10.123Z :: Waiting for transaction to be included in block...
-2025-11-03T17:36:15.338Z :: Transaction receipt received. Block number: 185325
+2025-11-04T11:07:50.821Z :: Calling joinGame on contract with name Alice
+2025-11-04T11:07:53.508Z :: Transaction hash: 0xd819f76f1688dbb7ac120c80af2a4f43afe4993ca793553c00699c053f80b6f8
+2025-11-04T11:07:53.508Z :: Waiting for transaction to be included in block...
+2025-11-04T11:08:02.919Z :: Transaction receipt received. Block number: 195843
 ```
 
 ### Player: Encrypt 5 position (uint8) guesses
@@ -243,9 +268,9 @@ The guesses are encrypted into the file `alice_inputs.json`
 
 ```bash
 pnpm hardhat task:encryptOccupiedGuesses --input-file alice_inputs.json --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json --p1 17 --p2 4 --p3 2 --p4 21 --p5 6
-2025-11-03T17:39:05.328Z :: Encrypting...
-2025-11-03T17:41:51.137Z :: Input encrypted
-2025-11-03T17:41:51.138Z :: Encrypted input and ZK proof written to: alice_inputs.json
+2025-11-04T11:08:37.531Z :: Encrypting...
+2025-11-04T11:09:55.540Z :: Input encrypted
+2025-11-04T11:09:55.541Z :: Encrypted input and ZK proof written to: alice_inputs.json
 ```
 
 
@@ -254,18 +279,10 @@ The encrypted guess is read from the input file `alice_inputs.json`
 
 ```bash
 pnpm hardhat task:callMakeGuesses --input-file alice_inputs.json --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
-2025-11-03T17:42:47.078Z :: Loading wallet
-Set WALLET_PASSWORD env var to skip this prompt
-Enter password for wallet: 
-2025-11-03T17:42:51.077Z :: Loading contract address
-2025-11-03T17:42:51.078Z :: Loading testnet config
-2025-11-03T17:42:51.079Z :: Loading encrypted input and zkproof
-2025-11-03T17:42:51.080Z :: Connecting wallet
-2025-11-03T17:42:51.102Z :: Connecting to contract
-2025-11-03T17:42:51.109Z :: Calling makeGuesses contract
-2025-11-03T17:42:53.388Z :: Transaction hash: 0xd177b90e3532d27a3ad0ccc6ce2f47228cf98a3ed0fc004a865475d49d5cfd2f
-2025-11-03T17:42:53.388Z :: Waiting for transaction to be included in block...
-2025-11-03T17:42:58.503Z :: Transaction receipt received. Block number: 185392
+2025-11-04T11:12:00.001Z :: Calling makeGuesses contract
+2025-11-04T11:12:02.342Z :: Transaction hash: 0x0eadc015a49e255c26fb5b910c17944b97432aeda8581dca7d1bdc00b8e2ea78
+2025-11-04T11:12:02.343Z :: Waiting for transaction to be included in block...
+2025-11-04T11:12:11.756Z :: Transaction receipt received. Block number: 195884
 ```
 
 ### Player: Get the number of correct guesses
@@ -273,13 +290,13 @@ After they have made their guesses, the player can get the number of correct gue
 
 ```bash
 pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
-2025-11-03T18:39:39.417Z :: Calling getCorrectGuesses on contract
-2025-11-03T18:39:39.695Z :: Requesting decryption...
-2025-11-03T18:39:39.695Z :: Generating keypair...
-2025-11-03T18:39:39.702Z :: Creating EIP712...
-2025-11-03T18:39:39.703Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
-2025-11-03T18:39:39.711Z :: User decrypt...
-2025-11-03T18:39:56.613Z :: Decrypted number of correct guesses: 1
+2025-11-04T11:13:10.470Z :: Calling getCorrectGuesses on contract
+2025-11-04T11:13:10.682Z :: Requesting decryption...
+2025-11-04T11:13:10.682Z :: Generating keypair...
+2025-11-04T11:13:10.690Z :: Creating EIP712...
+2025-11-04T11:13:10.690Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-04T11:13:10.699Z :: User decrypt...
+2025-11-04T11:13:25.099Z :: Decrypted number of correct guesses: 1
 ```
 
 
@@ -287,24 +304,24 @@ pnpm hardhat task:getCorrectGuesses --config-file testnet_config.json --address-
 To see the guesses you have submitted:
 
 ```bash
-pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file bob.json 
-2025-11-03T19:24:21.700Z :: Calling getGuesses on contract to get ciphertext handles
-2025-11-03T19:24:21.989Z :: Requesting decryption...
-2025-11-03T19:24:21.989Z :: Generating keypair...
-2025-11-03T19:24:21.995Z :: Creating EIP712...
-2025-11-03T19:24:21.996Z :: Signer 0x2dEd2BE82980D66F871A1bc5Af8dB3ae55ce9ce9 sign typed data...
-2025-11-03T19:24:22.002Z :: User decrypt...
-2025-11-03T19:24:32.552Z :: Decrypted player guesses: 
-[ 10n, 16n, 23n, 22n, 21n ]
+pnpm hardhat task:getGuesses --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
+2025-11-04T11:16:10.124Z :: Calling getGuesses on contract to get ciphertext handles
+2025-11-04T11:16:10.335Z :: Requesting decryption...
+2025-11-04T11:16:10.335Z :: Generating keypair...
+2025-11-04T11:16:10.344Z :: Creating EIP712...
+2025-11-04T11:16:10.344Z :: Signer 0x8D7c26ac47A0f3488D1a889B8B1BB6848d88b416 sign typed data...
+2025-11-04T11:16:10.353Z :: User decrypt...
+2025-11-04T11:16:20.559Z :: Decrypted player guesses: 
+[ 17n, 4n, 2n, 21n, 6n ]
 ```
 
 ### Player: Get occupied positions and decrypt them when the game ends
-When the game ends, the contract owner makes the ship positions publicly decryptable and all players will be able decrypt the occupied positions.
+When the game ends, the contract owner makes the occupied positions publicly decryptable and all players will be able decrypt the occupied positions.
 
 ```bash
 pnpm hardhat task:getOccupiedPositions --config-file testnet_config.json --address-file mysterydoors.address --key-file alice.json
-2025-11-03T18:51:56.797Z :: Calling getOccupiedPositions on contract to get ciphertext handles
-2025-11-03T18:51:56.988Z :: Requesting decryption...
-2025-11-03T18:51:58.048Z :: Decrypted occupied positions: 
+2025-11-04T11:39:03.014Z :: Calling getOccupiedPositions on contract to get ciphertext handles
+2025-11-04T11:39:03.317Z :: Requesting decryption...
+2025-11-04T11:39:04.554Z :: Decrypted occupied positions: 
 [ 24n, 23n, 22n, 17n, 12n ]
 ```

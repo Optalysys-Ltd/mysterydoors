@@ -162,6 +162,21 @@ describe("MysteryDoors", function () {
     console.log(playerNumCorrectGuesses);
   });
 
+    it("Players cannot join the game multiple times", async () => {
+      const positionGuesses = [17, 4, 2, 21, 6];
+
+    const input = fhevm.createEncryptedInput(mysteryDoorsContractAddress, signers.alice.address);
+    input.add8(positionGuesses[0]);
+    input.add8(positionGuesses[1]);
+    input.add8(positionGuesses[2]);
+    input.add8(positionGuesses[3]);
+    input.add8(positionGuesses[4]);
+    const encryptedInput = await input.encrypt();
+    await mysteryDoorsContract.connect(signers.alice).joinGame("Alice");
+    await mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
+    await expect(mysteryDoorsContract.connect(signers.alice).joinGame("Alice")).to.be.revertedWith("You have already joined the game!");
+    });
+
   it("Player needs to have joined the game", async () => {
     const positionGuesses = [17, 4, 2, 21, 6];
 
