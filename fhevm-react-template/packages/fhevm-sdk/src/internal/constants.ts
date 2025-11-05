@@ -1,4 +1,4 @@
-import testnetConfigRaw from "~~/testnet_config.json";
+import testnetConfigRaw from "../testnet_config.json";
 import { FhevmInstanceConfig } from "../fhevmTypes";
 
 
