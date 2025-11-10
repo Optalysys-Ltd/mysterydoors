@@ -50,7 +50,7 @@ export const buildParamsFromAbi = (enc: EncryptResult, abi: any[], functionName:
   if (!fn) throw new Error(`Function ABI not found for ${functionName}`);
 
   return fn.inputs.map((input: any, index: number) => {
-    const raw = index === 0 ? enc.handles[0] : enc.inputProof;
+    const raw = index < enc.handles.length ? enc.handles[index] : enc.inputProof;
     switch (input.type) {
       case "bytes32":
       case "bytes":

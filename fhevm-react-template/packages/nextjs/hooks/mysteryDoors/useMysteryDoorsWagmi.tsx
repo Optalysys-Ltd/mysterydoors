@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDeployedContractInfo } from "../helper";
 import { useWagmiEthers } from "../wagmi/useWagmiEthers";
 import { FhevmInstance } from "@fhevm-sdk";
+import { RelayerEncryptedInput } from "@zama-fhe/relayer-sdk/web";
 import {
   buildParamsFromAbi,
   getEncryptionMethod,
@@ -116,7 +117,6 @@ export const useMysteryDoorsWagmi = (parameters: {
     if (decMsg) setMessage(decMsg);
   }, [decMsg]);
 
-  const decryptCountHandle = decrypt;
 
   // Mutations (increment/decrement)
   const { encryptWith } = useFHEEncryption({ instance, ethersSigner: ethersSigner as any, contractAddress: mysteryDoors?.address });
@@ -125,6 +125,58 @@ export const useMysteryDoorsWagmi = (parameters: {
     [hasContract, instance, hasSigner, isProcessing],
   );
 
+    const getEncryptionMethodFor = (functionName: "makeGuesses") => {
+    const functionAbi = mysteryDoors?.abi.find(item => item.type === "function" && item.name === functionName);
+    if (!functionAbi) return { method: undefined as string | undefined, error: `Function ABI not found for ${functionName}` } as const;
+    if (!functionAbi.inputs || functionAbi.inputs.length === 0)
+      return { method: undefined as string | undefined, error: `No inputs found for ${functionName}` } as const;
+    const methods: string[] = functionAbi.inputs.slice(0, -1).map((input: { internalType: string; }, index: any) => {
+      return getEncryptionMethod(input.internalType);
+    })
+    console.log(methods);
+    return { methods, error: undefined } as const;
+  };
+
+  const callMakeGuesses = useCallback(
+      async (guesses: number[]) => {
+        if (isProcessing || !canUpdateCounter || guesses.length === 0) return;
+        const functionName = "makeGuesses";
+        const encSig = guesses.join(", ");
+        setIsProcessing(true);
+        setMessage(`Starting ${functionName}(${encSig})...`);
+        try {
+          const { methods, error } = getEncryptionMethodFor(functionName);
+          if (!methods) return setMessage(error ?? "Encryption method not found");
+  
+          setMessage(`Encrypting with ${methods.join(", ")}...`);
+          const enc = await encryptWith(builder => {
+            const chained = methods.reduce((acc: RelayerEncryptedInput, method: string, index: number, ) => {
+              return (acc as any)[method](guesses[index]);
+            }, builder);
+            console.log(chained);
+            return chained;
+          });
+          if (!enc) return setMessage("Encryption failed");
+  
+          const writeContract = getContract("write");
+          if (!writeContract) return setMessage("Contract info or signer not available");
+  
+          const params = buildParamsFromAbi(enc, [...mysteryDoors!.abi] as any[], functionName);
+          console.log(params);
+          const tx = await (writeContract.makeGuesses(...params));
+          setMessage("Waiting for transaction...");
+          await tx.wait();
+          setMessage(`${functionName}(${encSig}) completed!`);
+          //refreshCountHandle();
+        } catch (e) {
+          setMessage(`${functionName} failed: ${e instanceof Error ? e.message : String(e)}`);
+        } finally {
+          setIsProcessing(false);
+        }
+      },
+      [isProcessing, canUpdateCounter, encryptWith, getContract, mysteryDoors?.abi],
+    );
+
 
 
   return {
@@ -132,6 +184,7 @@ export const useMysteryDoorsWagmi = (parameters: {
     canDecrypt,
     canGetCount,
     canUpdateCounter,
+    callAddGuess: callMakeGuesses,
     message,
     handle: guessesHandles,
     isDecrypting,

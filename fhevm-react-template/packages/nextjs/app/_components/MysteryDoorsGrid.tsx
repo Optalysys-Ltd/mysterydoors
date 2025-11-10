@@ -11,10 +11,12 @@ import React from "react";
 export function MysteryDoorsGridMeasured({
   bgUrl,
   onCellClick,
+  isSelected,
   className = "",
 }: {
   bgUrl: string;
   onCellClick?: (index: number) => void;
+  isSelected: (index: number) => boolean;
   className?: string;
 }) {
   // constants derived from the background image layout
@@ -64,43 +66,32 @@ export function MysteryDoorsGridMeasured({
           gap: `30px 24px`,
         }}
       >
-        {cells.map((n, i) => (
-          <div
-            key={n}
-            role="button"
-            tabIndex={0}
-            aria-label={`Door cell ${n}`}
-            onClick={() => handleActivate(i)}
-            onKeyDown={(e) => handleKeyDown(e, i)}
-            className="bg-red-100/40 flex items-center justify-center
+        {cells.map((n, i) => {
+          const active = isSelected(n);
+          return (
+            <div
+              key={n}
+              role="button"
+              tabIndex={0}
+              aria-label={`Door cell ${n}`}
+              onClick={() => handleActivate(n)}
+              className={`flex items-center justify-center
                        select-none cursor-pointer transition-transform duration-150
-                       hover:scale-[1.03] active:scale-[0.98] rounded-lg"
-            style={{
-              width: CELL_W,
-              height: CELL_H,
-            }}
-          >
-            <span className="text-neutral-900/90 font-semibold text-xl drop-shadow-[0_1px_0_rgba(255,255,255,0.6)]">
-              {n}
-            </span>
-          </div>
-        ))}
+                       hover:scale-[1.03] active:scale-[0.98] rounded-lg  ${active ? "bg-emerald-400/40 text-white shadow-lg scale-105"
+                  : "bg-red-100/40 hover:bg-white text-gray-800"
+                }`}
+              style={{
+                width: CELL_W,
+                height: CELL_H,
+              }}
+            >
+              <span className="text-neutral-900/90 font-semibold text-xl drop-shadow-[0_1px_0_rgba(255,255,255,0.6)]">
+                {n}
+              </span>
+            </div>
+          );
+        })}
       </div>
-    </div>
-  );
-}
-
-/* Example usage
-------------------------------------------------- */
-// import { MysteryDoorsGridMeasured } from "./MysteryDoorsGridMeasured";
-
-export default function App() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[rgb(228,222,215)] p-8">
-      <MysteryDoorsGridMeasured
-        bgUrl="/images/A_flat_digital_2D_illustration_features_25_doors_a.png"
-        onCellClick={(i) => alert(`Clicked cell #${i + 1}`)}
-      />
     </div>
   );
 }

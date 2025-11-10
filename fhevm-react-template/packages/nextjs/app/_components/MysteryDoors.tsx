@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
-import { useFHECounterWagmi } from "~~/hooks/fhecounter-example/useFHECounterWagmi";
+import { useMysteryDoorsWagmi } from "~~/hooks/mysteryDoors/useMysteryDoorsWagmi";
 import { MysteryDoorsGridMeasured } from "~~/app/_components/MysteryDoorsGrid";
+import { useMysteryDoorsSelection } from "~~/hooks/mysteryDoors/useMysteryDoorsSelection";
 
 /*
  * Main FHECounter React component with 3 buttons
@@ -15,7 +16,9 @@ import { MysteryDoorsGridMeasured } from "~~/app/_components/MysteryDoorsGrid";
  */
 export const MysteryDoors = () => {
   const { isConnected, chain } = useAccount();
-
+  const { selected, isSelected, toggleDoor, count } = useMysteryDoorsSelection({
+    maxSelected: 5,
+  });
   const chainId = chain?.id;
 
   //////////////////////////////////////////////////////////////////////////////
@@ -50,7 +53,7 @@ export const MysteryDoors = () => {
   // - decrypting FHE handles
   //////////////////////////////////////////////////////////////////////////////
 
-  const fheCounter = useFHECounterWagmi({
+  const mysteryDoors = useMysteryDoorsWagmi({
     instance: fhevmInstance,
     initialMockChains,
   });
@@ -110,6 +113,7 @@ export const MysteryDoors = () => {
     );
   }
 
+
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6 text-gray-900">
       {/* Header */}
@@ -118,44 +122,77 @@ export const MysteryDoors = () => {
         <p className="text-gray-600">Interact with the Fully Homomorphic Encryption Mystery Doors contract</p>
       </div>
 
-      {/* Game grid */}
-    <MysteryDoorsGridMeasured bgUrl={"/mysterydoors3.png"} />
 
-      {/* Messages */ }
-  {
-    fheCounter.message && (
-      <div className={sectionClass}>
-        <h3 className={titleClass}>💬 Messages</h3>
-        <div className="border bg-white border-gray-200 p-4">
-          <p className="text-gray-800">{fheCounter.message}</p>
+      {/* Game grid */}
+      <MysteryDoorsGridMeasured bgUrl={"/mysterydoors3.png"} onCellClick={(i) => toggleDoor(i)} isSelected={(i) => isSelected(i)} />
+      
+      
+      {/* Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-black">
+        {/* <button
+          className={mysteryDoors.isDecrypted ? successButtonClass : primaryButtonClass}
+          disabled={!mysteryDoors.canDecrypt}
+          onClick={mysteryDoors.decryptCountHandle}
+        > 
+          {mysteryDoors.canDecrypt
+            ? "🔓 Decrypt Counter"
+            : mysteryDoors.isDecrypted
+              ? `✅ Decrypted: ${mysteryDoors.clear}`
+              : mysteryDoors.isDecrypting
+                ? "⏳ Decrypting..."
+                : "❌ Nothing to decrypt"}
+        </button> */}
+
+        <button
+          className={secondaryButtonClass}
+          disabled={!mysteryDoors.canUpdateCounter || selected.length !== 5}
+          onClick={() => mysteryDoors.callAddGuess(selected)}
+        >
+          {mysteryDoors.canUpdateCounter
+            ? "Submit guesses"
+            : mysteryDoors.isProcessing
+              ? "⏳ Processing..."
+              : "❌ Cannot submit guesses"}
+        </button>
+
+      </div>
+      {/* Messages */}
+      {
+        mysteryDoors.message && (
+          <div className={sectionClass}>
+            <h3 className={titleClass}>💬 Messages</h3>
+            <div className="border bg-white border-gray-200 p-4">
+              <p className="text-gray-800">{mysteryDoors.message}</p>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Status Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={sectionClass}>
+          <h3 className={titleClass}>🔧 FHEVM Instance</h3>
+          <div className="space-y-3">
+            {printProperty("Instance Status", fhevmInstance ? "✅ Connected" : "❌ Disconnected")}
+            {printProperty("Status", fhevmStatus)}
+            {printProperty("Error", fhevmError ?? "No errors")}
+          </div>
+        </div>
+
+        <div className={sectionClass}>
+          <h3 className={titleClass}>MysteryDoors Status</h3>
+          <div className="space-y-3">
+            {printProperty("Selected", `${count}/5`)}
+            {printProperty("Selections", `${selected.join(", ") || "None"}`)}
+            {printProperty("Refreshing", mysteryDoors.isRefreshing)}
+            {printProperty("Decrypting", mysteryDoors.isDecrypting)}
+            {printProperty("Processing", mysteryDoors.isProcessing)}
+            {printProperty("Can Get Count", mysteryDoors.canGetCount)}
+            {printProperty("Can Decrypt", mysteryDoors.canDecrypt)}
+            {printProperty("Can Modify", mysteryDoors.canUpdateCounter)}
+          </div>
         </div>
       </div>
-    )
-  }
-
-  {/* Status Cards */ }
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div className={sectionClass}>
-      <h3 className={titleClass}>🔧 FHEVM Instance</h3>
-      <div className="space-y-3">
-        {printProperty("Instance Status", fhevmInstance ? "✅ Connected" : "❌ Disconnected")}
-        {printProperty("Status", fhevmStatus)}
-        {printProperty("Error", fhevmError ?? "No errors")}
-      </div>
-    </div>
-
-    <div className={sectionClass}>
-      <h3 className={titleClass}>📊 Counter Status</h3>
-      <div className="space-y-3">
-        {printProperty("Refreshing", fheCounter.isRefreshing)}
-        {printProperty("Decrypting", fheCounter.isDecrypting)}
-        {printProperty("Processing", fheCounter.isProcessing)}
-        {printProperty("Can Get Count", fheCounter.canGetCount)}
-        {printProperty("Can Decrypt", fheCounter.canDecrypt)}
-        {printProperty("Can Modify", fheCounter.canUpdateCounter)}
-      </div>
-    </div>
-  </div>
     </div >
   );
 };
@@ -194,8 +231,8 @@ function printBooleanProperty(name: string, value: boolean) {
       <span className="text-gray-700 font-medium">{name}</span>
       <span
         className={`font-mono text-sm font-semibold px-2 py-1 border ${value
-            ? "text-green-800 bg-green-100 border-green-300"
-            : "text-red-800 bg-red-100 border-red-300"
+          ? "text-green-800 bg-green-100 border-green-300"
+          : "text-red-800 bg-red-100 border-red-300"
           }`}
       >
         {value ? "✓ true" : "✗ false"}
