@@ -1,5 +1,5 @@
 import * as chains from "viem/chains";
-import scaffoldConfig from "~~/scaffold.config";
+import scaffoldConfig, { OPTALYSYS_DEV_CHAIN_ID } from "~~/scaffold.config";
 
 type ChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -34,10 +34,13 @@ export const RPC_CHAIN_NAMES: Record<number, string> = {
   [chains.baseSepolia.id]: "base-sepolia",
   [chains.celo.id]: "celo-mainnet",
   [chains.celoSepolia.id]: "celo-sepolia",
-  [678259798]: "optalysys-dev",
+  [OPTALYSYS_DEV_CHAIN_ID]: "optalysys-dev",
 };
 
 export const getAlchemyHttpUrl = (chainId: number) => {
+  if (chainId === OPTALYSYS_DEV_CHAIN_ID) {
+    return "https://rpc.gcp-testnet-eth.dev.optalysys.com";
+  }
   return scaffoldConfig.alchemyApiKey && RPC_CHAIN_NAMES[chainId]
     ? `https://${RPC_CHAIN_NAMES[chainId]}.g.alchemy.com/v2/${scaffoldConfig.alchemyApiKey}`
     : undefined;
