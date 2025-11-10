@@ -7,6 +7,6 @@
   "kms_verifier_contract_address": "0x14739Df92074d156D46B83F3D0275870b9dcd8d8",
   "decryption_oracle_contract_address": "0x5Fa75Ce98Ec335C5059c6C106F5699C82c428C30",
   "input_verifier_contract_address": "0x30718297cb86e4152BBB625f0942372a90e62885",
-  "json_rpc_url": "https://localhost:3000/rpc",
-  "relayer_url": "https://localhost:3000/api/relayer"
+  "json_rpc_url": "/rpc",
+  "relayer_url": "/api/relayer"
 }
