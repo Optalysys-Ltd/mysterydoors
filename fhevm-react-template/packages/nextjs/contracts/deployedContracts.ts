@@ -466,144 +466,172 @@ const deployedContracts = {
       deployedOnBlock: 195596,
     },
      FHECounter: {
-      address: "0x40e8Aa088739445BC3a3727A724F56508899f65B",
+      address: "0x3733f10d9029f5DE5083751410603ED3C1f901B6",
       abi: [
+    {
+      "inputs": [
         {
-          inputs: [
-            {
-              internalType: "externalEuint32",
-              name: "inputEuint32",
-              type: "bytes32",
-            },
-            {
-              internalType: "bytes",
-              name: "inputProof",
-              type: "bytes",
-            },
-          ],
-          name: "decrement",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
+          "internalType": "address",
+          "name": "aclAdd",
+          "type": "address"
         },
         {
-          inputs: [],
-          name: "getCount",
-          outputs: [
-            {
-              internalType: "euint32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
+          "internalType": "address",
+          "name": "fhevmExecutorAdd",
+          "type": "address"
         },
         {
-          inputs: [
-            {
-              internalType: "externalEuint32",
-              name: "inputEuint32",
-              type: "bytes32",
-            },
-            {
-              internalType: "bytes",
-              name: "inputProof",
-              type: "bytes",
-            },
-          ],
-          name: "increment",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
+          "internalType": "address",
+          "name": "kmsVerifierAdd",
+          "type": "address"
         },
         {
-          inputs: [],
-          name: "protocolId",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "pure",
-          type: "function",
-        },
+          "internalType": "address",
+          "name": "decryptionOracleAdd",
+          "type": "address"
+        }
       ],
-      inheritedFunctions: {},
-      deployedOnBlock: 3,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
-    FHECounter: {
-      address: "0x0Bfea07384337E0081Ee14A88b4F3CCB20FCE02D",
-      abi: [
+    {
+      "inputs": [
         {
-          inputs: [
-            {
-              internalType: "externalEuint32",
-              name: "inputEuint32",
-              type: "bytes32",
-            },
-            {
-              internalType: "bytes",
-              name: "inputProof",
-              type: "bytes",
-            },
-          ],
-          name: "decrement",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
+          "internalType": "externalEuint32",
+          "name": "inputEuint32",
+          "type": "bytes32"
         },
         {
-          inputs: [],
-          name: "getCount",
-          outputs: [
-            {
-              internalType: "euint32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "externalEuint32",
-              name: "inputEuint32",
-              type: "bytes32",
-            },
-            {
-              internalType: "bytes",
-              name: "inputProof",
-              type: "bytes",
-            },
-          ],
-          name: "increment",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "protocolId",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "pure",
-          type: "function",
-        },
+          "internalType": "bytes",
+          "name": "inputProof",
+          "type": "bytes"
+        }
       ],
+      "name": "decrement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getCount",
+      "outputs": [
+        {
+          "internalType": "euint32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "externalEuint32",
+          "name": "inputEuint32",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "inputProof",
+          "type": "bytes"
+        }
+      ],
+      "name": "increment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
       inheritedFunctions: {},
-      deployedOnBlock: 97020,
+      deployedOnBlock: 1611,
     },
   },
+  11155111: {
+    FHECounter: {
+      address: "0x3733f10d9029f5DE5083751410603ED3C1f901B6",
+      abi: [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "aclAdd",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "fhevmExecutorAdd",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "kmsVerifierAdd",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "decryptionOracleAdd",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "externalEuint32",
+          "name": "inputEuint32",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "inputProof",
+          "type": "bytes"
+        }
+      ],
+      "name": "decrement",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getCount",
+      "outputs": [
+        {
+          "internalType": "euint32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "externalEuint32",
+          "name": "inputEuint32",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "inputProof",
+          "type": "bytes"
+        }
+      ],
+      "name": "increment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+      inheritedFunctions: {},
+      deployedOnBlock: 9598464,
+    }
+  }
 } as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;

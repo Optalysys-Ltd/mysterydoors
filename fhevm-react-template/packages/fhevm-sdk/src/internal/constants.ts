@@ -46,3 +46,9 @@ export function createTestnetFhevmInstanceConfig(): FhevmInstanceConfig {
   };
 
 }
+
+export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
+
+export function isTestnet(chainId: number): boolean {
+  return chainId === OPTALYSYS_DEV_CHAIN_ID;
+}

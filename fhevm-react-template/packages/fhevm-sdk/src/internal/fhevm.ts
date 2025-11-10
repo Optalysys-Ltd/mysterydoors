@@ -8,7 +8,7 @@ import type {
 import { isFhevmWindowType, RelayerSDKLoader } from "./RelayerSDKLoader";
 import { publicKeyStorageGet, publicKeyStorageSet } from "./PublicKeyStorage";
 import { FhevmInstance, FhevmInstanceConfig } from "../fhevmTypes";
-import { createTestnetFhevmInstanceConfig } from "./constants";
+import { createTestnetFhevmInstanceConfig, isTestnet } from "./constants";
 
 export class FhevmReactError extends Error {
   code: string;
@@ -285,10 +285,17 @@ export const createFhevmInstance = async (parameters: {
   }
 
   const relayerSDK = (window as unknown as FhevmWindowType).relayerSDK;
+  let aclAddress = relayerSDK.SepoliaConfig.aclContractAddress;
+
   const testnetConfig = createTestnetFhevmInstanceConfig();
   console.log(testnetConfig);
 
-  const aclAddress = testnetConfig.aclContractAddress; // relayerSDK.SepoliaConfig.aclContractAddress;
+  const isOptalysysDev = isTestnet(chainId);
+  console.log(`isOptalysysDev: ${isOptalysysDev}`);
+  if (isOptalysysDev) {
+    aclAddress = testnetConfig.aclContractAddress;
+  }
+
   if (!checkIsAddress(aclAddress)) {
     throw new Error(`Invalid address: ${aclAddress}`);
   }
@@ -296,23 +303,27 @@ export const createFhevmInstance = async (parameters: {
   const pub = await publicKeyStorageGet(aclAddress);
   throwIfAborted();
 
-  const config: FhevmInstanceConfig = {
+  let config: FhevmInstanceConfig = {
     ...relayerSDK.SepoliaConfig,
     network: providerOrUrl,
     publicKey: pub.publicKey,
     publicParams: pub.publicParams,
   };
 
+  if (isOptalysysDev) {
+    const optalysysConfig: FhevmInstanceConfig = {
+      ...testnetConfig, publicKey: pub.publicKey,
+      publicParams: pub.publicParams,
+    };
+    config = optalysysConfig;
+  }
 
-  const optalysysConfig: FhevmInstanceConfig = {
-    ...testnetConfig, publicKey: pub.publicKey,
-    publicParams: pub.publicParams,
-  };
+
 
   // notify that state === "creating"
   notify("creating");
 
-  const instance = await relayerSDK.createInstance(optalysysConfig);
+  const instance = await relayerSDK.createInstance(config);
   console.log(instance);
 
   // Save the key even if aborted
