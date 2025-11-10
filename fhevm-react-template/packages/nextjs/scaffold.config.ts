@@ -2,8 +2,9 @@ import * as chains from "viem/chains";
 import { defineChain } from "viem/utils";
 
 export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
+export const OPTALYSYS_DEV_RPC_URL = "https://rpc.gcp-testnet-eth.dev.optalysys.com";
 export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
-  id: 678259798,
+  id: OPTALYSYS_DEV_CHAIN_ID,
   name: 'Optalysys dev',
   nativeCurrency: {
     decimals: 18,
@@ -11,7 +12,7 @@ export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
     symbol: 'OPT',
   },
   rpcUrls: {
-    default: { http: ['https://rpc.gcp-testnet-eth.dev.optalysys.com'] },
+    default: { http: [OPTALYSYS_DEV_RPC_URL] },
   },
 })
 
@@ -49,7 +50,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
-    //[OPTALYSYS_DEV_CHAIN_ID]: "https://rpc.gcp-testnet-eth.dev.optalysys.com"
+    [OPTALYSYS_DEV_CHAIN_ID]: OPTALYSYS_DEV_RPC_URL,
     // Example:
     // [chains.mainnet.id]: "https://mainnet.rpc.buidlguidl.com",
   },
