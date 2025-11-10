@@ -5,6 +5,7 @@ import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
 import { useFHECounterWagmi } from "~~/hooks/fhecounter-example/useFHECounterWagmi";
+import { MysteryDoorsGridMeasured } from "~~/app/_components/MysteryDoorsGrid";
 
 /*
  * Main FHECounter React component with 3 buttons
@@ -113,94 +114,49 @@ export const MysteryDoors = () => {
     <div className="max-w-6xl mx-auto p-6 space-y-6 text-gray-900">
       {/* Header */}
       <div className="text-center mb-8 text-black">
-        <h1 className="text-3xl font-bold mb-2">FHE Counter Demo</h1>
-        <p className="text-gray-600">Interact with the Fully Homomorphic Encryption Counter contract</p>
+        <h1 className="text-3xl font-bold mb-2">Mystery Doors</h1>
+        <p className="text-gray-600">Interact with the Fully Homomorphic Encryption Mystery Doors contract</p>
       </div>
 
-      {/* Count Handle Display */}
+      {/* Game grid */}
+    <MysteryDoorsGridMeasured bgUrl={"/mysterydoors3.png"} />
+
+      {/* Messages */ }
+  {
+    fheCounter.message && (
       <div className={sectionClass}>
-        <h3 className={titleClass}>🔢 Count Handle</h3>
-        <div className="space-y-3 space-x-3">
-          {printProperty("Encrypted Handle", fheCounter.handle || "No handle available")}
-          {printProperty("Decrypted Value", fheCounter.isDecrypted ? fheCounter.clear : "Not decrypted yet")}
+        <h3 className={titleClass}>💬 Messages</h3>
+        <div className="border bg-white border-gray-200 p-4">
+          <p className="text-gray-800">{fheCounter.message}</p>
         </div>
       </div>
+    )
+  }
 
-      {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-black">
-        <button
-          className={fheCounter.isDecrypted ? successButtonClass : primaryButtonClass}
-          disabled={!fheCounter.canDecrypt}
-          onClick={fheCounter.decryptCountHandle}
-        >
-          {fheCounter.canDecrypt
-            ? "🔓 Decrypt Counter"
-            : fheCounter.isDecrypted
-              ? `✅ Decrypted: ${fheCounter.clear}`
-              : fheCounter.isDecrypting
-                ? "⏳ Decrypting..."
-                : "❌ Nothing to decrypt"}
-        </button>
-
-        <button
-          className={secondaryButtonClass}
-          disabled={!fheCounter.canUpdateCounter}
-          onClick={() => fheCounter.updateCounter(+1)}
-        >
-          {fheCounter.canUpdateCounter
-            ? "➕ Increment +1"
-            : fheCounter.isProcessing
-              ? "⏳ Processing..."
-              : "❌ Cannot increment"}
-        </button>
-
-        <button
-          className={secondaryButtonClass}
-          disabled={!fheCounter.canUpdateCounter}
-          onClick={() => fheCounter.updateCounter(-1)}
-        >
-          {fheCounter.canUpdateCounter
-            ? "➖ Decrement -1"
-            : fheCounter.isProcessing
-              ? "⏳ Processing..."
-              : "❌ Cannot decrement"}
-        </button>
-      </div>
-
-      {/* Messages */}
-      {fheCounter.message && (
-        <div className={sectionClass}>
-          <h3 className={titleClass}>💬 Messages</h3>
-          <div className="border bg-white border-gray-200 p-4">
-            <p className="text-gray-800">{fheCounter.message}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={sectionClass}>
-          <h3 className={titleClass}>🔧 FHEVM Instance</h3>
-          <div className="space-y-3">
-            {printProperty("Instance Status", fhevmInstance ? "✅ Connected" : "❌ Disconnected")}
-            {printProperty("Status", fhevmStatus)}
-            {printProperty("Error", fhevmError ?? "No errors")}
-          </div>
-        </div>
-
-        <div className={sectionClass}>
-          <h3 className={titleClass}>📊 Counter Status</h3>
-          <div className="space-y-3">
-            {printProperty("Refreshing", fheCounter.isRefreshing)}
-            {printProperty("Decrypting", fheCounter.isDecrypting)}
-            {printProperty("Processing", fheCounter.isProcessing)}
-            {printProperty("Can Get Count", fheCounter.canGetCount)}
-            {printProperty("Can Decrypt", fheCounter.canDecrypt)}
-            {printProperty("Can Modify", fheCounter.canUpdateCounter)}
-          </div>
-        </div>
+  {/* Status Cards */ }
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className={sectionClass}>
+      <h3 className={titleClass}>🔧 FHEVM Instance</h3>
+      <div className="space-y-3">
+        {printProperty("Instance Status", fhevmInstance ? "✅ Connected" : "❌ Disconnected")}
+        {printProperty("Status", fhevmStatus)}
+        {printProperty("Error", fhevmError ?? "No errors")}
       </div>
     </div>
+
+    <div className={sectionClass}>
+      <h3 className={titleClass}>📊 Counter Status</h3>
+      <div className="space-y-3">
+        {printProperty("Refreshing", fheCounter.isRefreshing)}
+        {printProperty("Decrypting", fheCounter.isDecrypting)}
+        {printProperty("Processing", fheCounter.isProcessing)}
+        {printProperty("Can Get Count", fheCounter.canGetCount)}
+        {printProperty("Can Decrypt", fheCounter.canDecrypt)}
+        {printProperty("Can Modify", fheCounter.canUpdateCounter)}
+      </div>
+    </div>
+  </div>
+    </div >
   );
 };
 
@@ -237,11 +193,10 @@ function printBooleanProperty(name: string, value: boolean) {
     <div className="flex justify-between items-center py-2 px-3  bg-white border border-gray-200 w-full">
       <span className="text-gray-700 font-medium">{name}</span>
       <span
-        className={`font-mono text-sm font-semibold px-2 py-1 border ${
-          value
+        className={`font-mono text-sm font-semibold px-2 py-1 border ${value
             ? "text-green-800 bg-green-100 border-green-300"
             : "text-red-800 bg-red-100 border-red-300"
-        }`}
+          }`}
       >
         {value ? "✓ true" : "✗ false"}
       </span>
