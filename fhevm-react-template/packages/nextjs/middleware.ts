@@ -8,14 +8,8 @@ const allowedOrigins = [
 ];
 
 export function middleware(req: NextRequest) {
-  console.log(req.nextUrl);
   const { pathname, searchParams } = req.nextUrl;
-  if (pathname.startsWith('/relayer')) {
-    const path = pathname.replace('/relayer', '');
-    console.log(path);
-    const rewriteUrl = new URL(path, 'https://relayer.gcp-testnet-eth.dev.optalysys.com');
-    return NextResponse.rewrite(rewriteUrl)
-  } else if (pathname.startsWith('/rpc')) {
+  if (pathname.startsWith('/rpc')) {
     const path = pathname.replace('/rpc', '');
     console.log(path);
     const rewriteUrl = new URL(path, 'https://rpc.gcp-testnet-eth.dev.optalysys.com');
@@ -46,5 +40,5 @@ export function middleware(req: NextRequest) {
 
 // specify the path regex to apply the middleware to
 export const config = {
-  matcher: ['/rpc/:path*', '/relayer/:path*'],
+  matcher: ['/rpc/:path*'],
 }

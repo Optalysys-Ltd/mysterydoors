@@ -466,7 +466,7 @@ const deployedContracts = {
       deployedOnBlock: 195596,
     },
      FHECounter: {
-      address: "0x3733f10d9029f5DE5083751410603ED3C1f901B6",
+      address: "0xdccba2975ac84978e943074146AE757085FDD823",
       abi: [
     {
       "inputs": [
@@ -545,7 +545,7 @@ const deployedContracts = {
     }
   ],
       inheritedFunctions: {},
-      deployedOnBlock: 1611,
+      deployedOnBlock: 60375,
     },
   },
   11155111: {

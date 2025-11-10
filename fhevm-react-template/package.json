@@ -46,7 +46,7 @@
     "next:serve": "pnpm --filter ./packages/nextjs serve",
     "precommit": "lint-staged",
     "preinstall": "pnpm sdk:build",
-    "start": "pnpm --filter ./packages/nextjs dev",
+    "start": "pnpm --filter ./packages/nextjs dev --experimental-https",
     "test": "pnpm hardhat:test",
     "vercel": "pnpm --filter ./packages/nextjs vercel",
     "vercel:login": "pnpm --filter ./packages/nextjs vercel:login",
@@ -75,5 +75,6 @@
       "utf-8-validate",
       "yarn"
     ]
-  }
+  },
+  "packageManager": "pnpm@9.15.0"
 }
