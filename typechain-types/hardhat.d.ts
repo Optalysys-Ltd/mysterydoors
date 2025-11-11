@@ -54,6 +54,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FHECounter__factory>;
     getContractFactory(
+      name: "MysteryDoors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MysteryDoors__factory>;
+    getContractFactory(
       name: "Test",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Test__factory>;
@@ -109,6 +113,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.FHECounter>;
     getContractAt(
+      name: "MysteryDoors",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MysteryDoors>;
+    getContractAt(
       name: "Test",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -155,6 +164,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FHECounter>;
     deployContract(
+      name: "MysteryDoors",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MysteryDoors>;
+    deployContract(
       name: "Test",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Test>;
@@ -209,6 +222,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FHECounter>;
+    deployContract(
+      name: "MysteryDoors",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MysteryDoors>;
     deployContract(
       name: "Test",
       args: any[],

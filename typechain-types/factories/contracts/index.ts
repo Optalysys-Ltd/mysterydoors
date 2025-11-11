@@ -4,3 +4,4 @@
 export * as simpleSol from "./Simple.sol";
 export { Battleships__factory } from "./Battleships__factory";
 export { FHECounter__factory } from "./FHECounter__factory";
+export { MysteryDoors__factory } from "./MysteryDoors__factory";

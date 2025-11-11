@@ -28,5 +28,7 @@ export type { Battleships } from "./contracts/Battleships";
 export { Battleships__factory } from "./factories/contracts/Battleships__factory";
 export type { FHECounter } from "./contracts/FHECounter";
 export { FHECounter__factory } from "./factories/contracts/FHECounter__factory";
+export type { MysteryDoors } from "./contracts/MysteryDoors";
+export { MysteryDoors__factory } from "./factories/contracts/MysteryDoors__factory";
 export type { Test } from "./contracts/Simple.sol/Test";
 export { Test__factory } from "./factories/contracts/Simple.sol/Test__factory";

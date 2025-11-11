@@ -74,6 +74,9 @@ export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWa
   // signer: [`Signer`] from ethers (could a [`Wallet`])
   // ciphertextHandle: [`string`]
   // contractAddress: [`string`]
+  if (ciphertextHandles.length == 0) {
+    throw new Error("No ciphertexts to decrypt!");
+  }
 
   timestampLog("Generating keypair...")
 
@@ -84,6 +87,7 @@ export async function setupUserDecrypt(instance: FhevmInstance, signer: HDNodeWa
       contractAddress: contractAddress,
     };
   });
+
   const startTimeStamp = Math.floor(Date.now() / 1000).toString();
   const durationDays = '10'; // String for consistency
   const contractAddresses = [contractAddress];
