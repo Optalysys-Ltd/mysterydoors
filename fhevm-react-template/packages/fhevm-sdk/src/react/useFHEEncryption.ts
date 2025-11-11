@@ -49,6 +49,8 @@ export const buildParamsFromAbi = (enc: EncryptResult, abi: any[], functionName:
   const fn = abi.find((item: any) => item.type === "function" && item.name === functionName);
   if (!fn) throw new Error(`Function ABI not found for ${functionName}`);
 
+  console.log(fn.inputs);
+
   return fn.inputs.map((input: any, index: number) => {
     const raw = index < enc.handles.length ? enc.handles[index] : enc.inputProof;
     switch (input.type) {

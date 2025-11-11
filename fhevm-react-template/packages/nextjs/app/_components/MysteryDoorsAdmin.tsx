@@ -15,7 +15,7 @@ import { useMysteryDoorsSelection } from "~~/hooks/mysteryDoors/useMysteryDoorsS
  *  - "Increment" button: allows you to increment the FHECounter count handle using FHE operations.
  *  - "Decrement" button: allows you to decrement the FHECounter count handle using FHE operations.
  */
-export const MysteryDoors = () => {
+export const MysteryDoorsAdmin = () => {
   const { isConnected, chain } = useAccount();
   const { selected, isSelected, toggleDoor, count } = useMysteryDoorsSelection({
     maxSelected: 5,
@@ -120,7 +120,7 @@ export const MysteryDoors = () => {
     <div className="max-w-6xl mx-auto p-6 space-y-6 text-gray-900">
       {/* Header */}
       <div className="text-center mb-8 text-black">
-        <h1 className="text-3xl font-bold mb-2">Mystery Doors</h1>
+        <h1 className="text-3xl font-bold mb-2">Mystery Doors Admin</h1>
         <p className="text-gray-600">Interact with the Fully Homomorphic Encryption Mystery Doors contract</p>
       </div>
 
@@ -131,20 +131,19 @@ export const MysteryDoors = () => {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-black">
-
-        <button
-          className={mysteryDoors.isGuessesDecrypted ? successButtonClass : primaryButtonClass}
-          disabled={!mysteryDoors.canDecryptGuesses}
-          onClick={mysteryDoors.decryptGuessesHandles}
-        >
-          {mysteryDoors.canDecryptGuesses
-            ? "🔓 Decrypt Guesses"
-            : mysteryDoors.isGuessesDecrypted
-              ? `✅ Decrypted: ${mysteryDoors.clearGuesses}`
-              : mysteryDoors.isDecryptingGuesses
+        {/* <button
+          className={mysteryDoors.isDecrypted ? successButtonClass : primaryButtonClass}
+          disabled={!mysteryDoors.canDecrypt}
+          onClick={mysteryDoors.decryptCountHandle}
+        > 
+          {mysteryDoors.canDecrypt
+            ? "🔓 Decrypt Counter"
+            : mysteryDoors.isDecrypted
+              ? `✅ Decrypted: ${mysteryDoors.clear}`
+              : mysteryDoors.isDecrypting
                 ? "⏳ Decrypting..."
                 : "❌ Nothing to decrypt"}
-        </button>
+        </button> */}
 
         <button
           className={secondaryButtonClass}
@@ -158,27 +157,6 @@ export const MysteryDoors = () => {
               : "❌ Cannot submit guesses"}
         </button>
 
-        <div className="relative flex w-full max-w-[24rem]">
-          <Input
-            type="text"
-            label="Player name"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            className="pr-20 text-[#2D2D2D]"
-            containerProps={{
-              className: "min-w-0",
-            }}
-          />
-          <Button
-            size="md"
-            color={playerName ? "gray" : "blue-gray"}
-            disabled={!playerName}
-            className="!absolute right-1 top-1 rounded text-[#2D2D2D]"
-            onClick={() => mysteryDoors.callJoinGame(playerName)}
-          >
-            Join Game
-          </Button>
-        </div>
       </div>
 
 
@@ -211,10 +189,10 @@ export const MysteryDoors = () => {
             {printProperty("Selected", `${count}/5`)}
             {printProperty("Selections", `${selected.join(", ") || "None"}`)}
             {printProperty("Refreshing", mysteryDoors.isRefreshing)}
-            {printProperty("Decrypting guesses", mysteryDoors.isDecryptingGuesses)}
+            {/* printProperty("Decrypting", mysteryDoors.isDecrypting) */}
             {printProperty("Processing", mysteryDoors.isProcessing)}
-            {printProperty("Can Get Count", mysteryDoors.canGetGuesses)}
-            {printProperty("Can Decrypt Guesses", mysteryDoors.canDecryptGuesses)}
+            {/* printProperty("Can Get Count", mysteryDoors.canGetGuesses) */}
+            {/* printProperty("Can Decrypt", mysteryDoors.canDecrypt) */}
             {printProperty("Can Modify", mysteryDoors.canUpdate)}
           </div>
         </div>

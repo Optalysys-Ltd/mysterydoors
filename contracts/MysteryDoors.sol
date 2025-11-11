@@ -112,7 +112,7 @@ contract MysteryDoors is Ownable2Step {
     ) public onlyOwner {
         require(
             !gameStarted,
-            "Ships can only be placed before the game starts"
+            "Occupied doors can only be marked before the game starts!"
         );
         euint8 ePos1 = FHE.fromExternal(exPos1, inputProof);
         FHE.allowThis(ePos1);
@@ -148,6 +148,10 @@ contract MysteryDoors is Ownable2Step {
         require(
             bytes(playerNames[msg.sender]).length > 0,
             "You have not joined the game!"
+        );
+        require(
+            playerGuesses[msg.sender].length == 0,
+            "You have already submitted your guesses!"
         );
 
         euint8[] memory eGuesses = new euint8[](MAX_GUESSES);
