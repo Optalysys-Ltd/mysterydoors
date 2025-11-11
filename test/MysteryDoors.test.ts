@@ -382,6 +382,15 @@ describe("MysteryDoors before game start", function () {
 
     });
 
+    it("Returns the contract owner", async () => {
+      const owner = signers.deployer.address
+      const deployerCall = await mysteryDoorsContract.connect(signers.deployer).owner();
+      const bobCall = await mysteryDoorsContract.connect(signers.bob).owner();
+      expect(deployerCall).to.equal(owner);
+      expect(bobCall).to.equal(owner);
+    });
+
+
     it("The game can only be started when the occupied positions are set", async () => {
       await expect(mysteryDoorsContract.connect(signers.deployer).startGame()).to.be.revertedWith("The occupied positions haven't been set!");
       const occupiedPositions = [24, 23, 22, 17, 12]; // L
@@ -411,7 +420,7 @@ describe("MysteryDoors before game start", function () {
       const encryptedInput = await input.encrypt();
       await mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
       await mysteryDoorsContract.connect(signers.deployer).startGame();
-      await expect(mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).to.be.revertedWith("Occupied doors can only be marked before the game starts!");  
+      await expect(mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).to.be.revertedWith("Occupied doors can only be marked before the game starts!");
 
     });
 

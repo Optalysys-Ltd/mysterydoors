@@ -157,6 +157,14 @@ export const MysteryDoorsAdmin = () => {
               : "❌ Cannot submit guesses"}
         </button>
 
+        <button
+          className={secondaryButtonClass}
+          disabled={!mysteryDoors.canUpdate}
+          onClick={mysteryDoors.refreshOwner}
+        >
+          Owner: {mysteryDoors.checkIsOwner ? "Yes" : "No"}
+        </button>
+
       </div>
 
 
@@ -186,6 +194,7 @@ export const MysteryDoorsAdmin = () => {
         <div className={sectionClass}>
           <h3 className={titleClass}>MysteryDoors Status</h3>
           <div className="space-y-3">
+            {printProperty("Is contract owner?", `${mysteryDoors.checkIsOwner ? "Yes" : "No"}`)}
             {printProperty("Selected", `${count}/5`)}
             {printProperty("Selections", `${selected.join(", ") || "None"}`)}
             {printProperty("Refreshing", mysteryDoors.isRefreshing)}

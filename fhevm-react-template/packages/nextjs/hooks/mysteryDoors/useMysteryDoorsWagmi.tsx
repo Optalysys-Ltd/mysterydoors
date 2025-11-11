@@ -16,6 +16,7 @@ import { ethers } from "ethers";
 import type { Contract } from "~~/utils/helper/contract";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
 import { useReadContract } from "wagmi";
+import { MysteryDoors__factory } from "~~/typechain-types";
 
 type ClearGuess = {
   handle: string;
@@ -79,24 +80,24 @@ export const useMysteryDoorsWagmi = (parameters: {
   };
 
   // Read playersCorrectGuesses handle via wagmi
-    const readPlayersCorrectGuessesResult = useReadContract({
-      address: (hasContract ? (mysteryDoors!.address as unknown as `0x${string}`) : undefined) as
-        | `0x${string}`
-        | undefined,
-      abi: (hasContract ? ((mysteryDoors as MysteryDoorsInfo).abi as any) : undefined) as any,
-      functionName: "getPlayersCorrectGuesses" as const,
-      query: {
-        enabled: Boolean(hasContract && hasProvider),
-        refetchOnWindowFocus: false,
-      },
-    });
-  
-    const playersCorrectGuessesHandle = useMemo(() => (readPlayersCorrectGuessesResult.data as [string[], string[], string[]] | undefined) ?? undefined, [readPlayersCorrectGuessesResult.data]);
-    const canGetPlayersCorrectGuesses = Boolean(hasContract && hasProvider && !readPlayersCorrectGuessesResult.isFetching);
-    const refreshPlayersCorrectGuessesHandle = useCallback(async () => {
-      const res = await readPlayersCorrectGuessesResult.refetch();
-      if (res.error) setMessage("FHECounter.getPlayersCorrectGuesses() failed: " + (res.error as Error).message);
-    }, [readPlayersCorrectGuessesResult]);
+  const readPlayersCorrectGuessesResult = useReadContract({
+    address: (hasContract ? (mysteryDoors!.address as unknown as `0x${string}`) : undefined) as
+      | `0x${string}`
+      | undefined,
+    abi: (hasContract ? ((mysteryDoors as MysteryDoorsInfo).abi as any) : undefined) as any,
+    functionName: "getPlayersCorrectGuesses" as const,
+    query: {
+      enabled: Boolean(hasContract && hasProvider),
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  const playersCorrectGuessesHandle = useMemo(() => (readPlayersCorrectGuessesResult.data as [string[], string[], string[]] | undefined) ?? undefined, [readPlayersCorrectGuessesResult.data]);
+  const canGetPlayersCorrectGuesses = Boolean(hasContract && hasProvider && !readPlayersCorrectGuessesResult.isFetching);
+  const refreshPlayersCorrectGuessesHandle = useCallback(async () => {
+    const res = await readPlayersCorrectGuessesResult.refetch();
+    if (res.error) setMessage("MysteryDoors.getPlayersCorrectGuesses() failed: " + (res.error as Error).message);
+  }, [readPlayersCorrectGuessesResult]);
 
   // Read getGuesses handle via wagmi
   const readGetGuesses = useReadContract({
@@ -116,7 +117,7 @@ export const useMysteryDoorsWagmi = (parameters: {
   const refreshGuessesHandle = useCallback(async () => {
     console.log("refreshing guesses handle");
     const res = await readGetGuesses.refetch();
-    if (res.error) setMessage("FHECounter.getGuesses() failed: " + (res.error as Error).message);
+    if (res.error) setMessage("MysteryDoors.getGuesses() failed: " + (res.error as Error).message);
   }, [readGetGuesses]);
   // derive isRefreshing from wagmi
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -127,6 +128,7 @@ export const useMysteryDoorsWagmi = (parameters: {
   // Decrypt (reuse existing decrypt hook for simplicity)
   const guessesRequests = useMemo(() => {
     if (!hasContract || !guessesHandles || guessesHandles.length === 0 || guessesHandles[0] === ethers.ZeroHash) return undefined;
+    console.log(guessesHandles);
     return guessesHandles.map(guessesHandle => ({ handle: guessesHandle, contractAddress: (mysteryDoors?.address as unknown as `0x${string}`) })) as GuessesRequest[];
   }, [hasContract, mysteryDoors?.address, guessesHandles]);
 
@@ -148,17 +150,49 @@ export const useMysteryDoorsWagmi = (parameters: {
     if (decMsg) setMessage(decMsg);
   }, [decMsg]);
 
-  const clearGuesses = useMemo(() => {
-      if (!guessesHandles || guessesHandles.length === 0) return undefined;
-      if (guessesHandles[0] === ethers.ZeroHash) return guessesHandles.map(guessesHandle => (BigInt(0))) as BigInt[];
+  // Read getGuesses handle via wagmi
+  const readOwner = useReadContract({
+    address: (hasContract ? (mysteryDoors!.address as unknown as `0x${string}`) : undefined) as
+      | `0x${string}`
+      | undefined,
+    abi: (hasContract ? ((mysteryDoors as MysteryDoorsInfo).abi as any) : undefined) as any,
+    functionName: "owner",
+    query: {
+      enabled: Boolean(hasContract && hasProvider),
+      refetchOnWindowFocus: false,
+    },
+  });
+  const checkIsOwner = useMemo(() => {
+    ;
+    const { error, data } = readOwner;
+    if (error) {
+      setMessage("Contract info or signer not available");
+      return false;
+    }
+    const owner = data;
+    const walletAddress = accounts?.[0];
+    const checkOwnership = owner === walletAddress;
+    return checkOwnership;
 
-      const decryptedGuesses = guessesHandles.map(guessesHandle => (guessesResults[guessesHandle])) as BigInt[];
-      const firstClear = decryptedGuesses[0];
-      if (typeof firstClear === "undefined") return undefined;
-      return decryptedGuesses;
-    }, [guessesHandles, guessesResults]);
-  
-    const isGuessesDecrypted = Boolean(guessesHandles && clearGuesses && clearGuesses.length > 0 && clearGuesses[0] as unknown as string === guessesHandles[0]);
+  }, [readOwner.data, accounts]);
+
+  const refreshOwner = useCallback(async () => {
+    console.log("refreshing owner");
+    const res = await readOwner.refetch();
+    if (res.error) setMessage("MysteryDoors.owner() failed: " + (res.error as Error).message);
+  }, [readGetGuesses]);
+
+  const clearGuesses = useMemo(() => {
+    if (!guessesHandles || guessesHandles.length === 0) return undefined;
+    if (guessesHandles[0] === ethers.ZeroHash) return guessesHandles.map(guessesHandle => (BigInt(0))) as BigInt[];
+
+    const decryptedGuesses = guessesHandles.map(guessesHandle => (guessesResults[guessesHandle])) as BigInt[];
+    const firstClear = decryptedGuesses[0];
+    if (typeof firstClear === "undefined") return undefined;
+    return decryptedGuesses;
+  }, [guessesHandles, guessesResults]);
+
+  const isGuessesDecrypted = Boolean(guessesHandles && clearGuesses && clearGuesses.length > 0 && clearGuesses[0] as unknown as string === guessesHandles[0]);
 
 
   // Mutations (increment/decrement)
@@ -228,7 +262,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         const writeContract = getContract("write");
         if (!writeContract) return setMessage("Contract info or signer not available");
 
-        const tx = await (writeContract.joinGame(playerName));
+        const tx = await writeContract.joinGame(playerName);
         setMessage("Waiting for transaction...");
         await tx.wait();
         setMessage(`${functionName}(${playerName}) completed!`);
@@ -245,12 +279,14 @@ export const useMysteryDoorsWagmi = (parameters: {
 
   return {
     contractAddress: mysteryDoors?.address,
+    checkIsOwner,
     canDecryptGuesses,
     canGetGuesses,
     canUpdate,
     callMakeGuesses,
     callJoinGame,
     decryptGuessesHandles,
+    refreshOwner,
     refreshGuessesHandle,
     refreshPlayersCorrectGuessesHandle,
     isGuessesDecrypted,
