@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/helper/contract";
 const deployedContracts = {
   678259798: {
     MysteryDoors: {
-      address: "0x19695d31d9689C0673181B1a2c76F356204e119a",
+      address: "0x6f7fa00aA669fB5997cE2Cb9632776869B81161a",
       abi: [
     {
       "inputs": [

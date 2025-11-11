@@ -213,7 +213,7 @@ export const MysteryDoors = () => {
             {printProperty("Refreshing", mysteryDoors.isRefreshing)}
             {printProperty("Decrypting guesses", mysteryDoors.isDecryptingGuesses)}
             {printProperty("Processing", mysteryDoors.isProcessing)}
-            {printProperty("Can Get Count", mysteryDoors.canGetGuesses)}
+            {printProperty("Can Get Guesses", mysteryDoors.canGetGuesses)}
             {printProperty("Can Decrypt Guesses", mysteryDoors.canDecryptGuesses)}
             {printProperty("Can Modify", mysteryDoors.canUpdate)}
           </div>
