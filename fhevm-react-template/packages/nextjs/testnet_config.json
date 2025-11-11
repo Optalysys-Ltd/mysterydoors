@@ -1,0 +1,12 @@
+ {
+  "gateway_chain_id": "678259798",
+  "input_verification_contract_address": "0x94baae27C5F3f647C31a5a7d863701C08736E797",
+  "decryption_contract_address": "0x2a4c38464aaB36c448b373D55fEA7A9827bF6E9f",
+  "acl_contract_address": "0x053dC8674A6F4817d3AC01C89FbE573024f681C4",
+  "fhevm_executor_contract_address": "0xB10cB118334ca9Ed88Fe518D96e4cf892FF1c47d",
+  "kms_verifier_contract_address": "0x5A8ac1C8D2a8f163D875ed32bbf4FF1C530d4550",
+  "decryption_oracle_contract_address": "0x9Bc7da3dF609cAb990b972f1cEF648832f72595F",
+  "input_verifier_contract_address": "0x5D85721B3014c6ecDC8eF018d3E86Ca663639370",
+  "json_rpc_url": "https://rpc.gcp-testnet-eth.dev.optalysys.com",
+  "relayer_url": "https://relayer.gcp-testnet-eth.dev.optalysys.com"
+}

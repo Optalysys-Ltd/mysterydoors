@@ -129,7 +129,6 @@ describe("MysteryDoors", function () {
   before(async function () {
     const ethSigners: HardhatEthersSigner[] = await ethers.getSigners();
     signers = { deployer: ethSigners[0], alice: ethSigners[1], bob: ethSigners[2] };
-    console.log("Alice address: " + signers.alice.address);
   });
 
   beforeEach(async () => {
@@ -162,8 +161,8 @@ describe("MysteryDoors", function () {
     console.log(playerNumCorrectGuesses);
   });
 
-    it("Players cannot join the game multiple times", async () => {
-      const positionGuesses = [17, 4, 2, 21, 6];
+  it("Players cannot join the game multiple times", async () => {
+    const positionGuesses = [17, 4, 2, 21, 6];
 
     const input = fhevm.createEncryptedInput(mysteryDoorsContractAddress, signers.alice.address);
     input.add8(positionGuesses[0]);
@@ -175,7 +174,7 @@ describe("MysteryDoors", function () {
     await mysteryDoorsContract.connect(signers.alice).joinGame("Alice");
     await mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
     await expect(mysteryDoorsContract.connect(signers.alice).joinGame("Alice")).to.be.revertedWith("You have already joined the game!");
-    });
+  });
 
   it("Player needs to have joined the game", async () => {
     const positionGuesses = [17, 4, 2, 21, 6];
@@ -190,6 +189,22 @@ describe("MysteryDoors", function () {
     await expect(mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).to.be.revertedWith("You have not joined the game!");
     await mysteryDoorsContract.connect(signers.alice).joinGame("Alice");
     await expect(mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).not.to.be.reverted;
+  });
+
+  it("Player should not submit guesses multiple times", async () => {
+    const positionGuesses = [17, 4, 2, 21, 6];
+
+    const input = fhevm.createEncryptedInput(mysteryDoorsContractAddress, signers.alice.address);
+    input.add8(positionGuesses[0]);
+    input.add8(positionGuesses[1]);
+    input.add8(positionGuesses[2]);
+    input.add8(positionGuesses[3]);
+    input.add8(positionGuesses[4]);
+    const encryptedInput = await input.encrypt();
+    await mysteryDoorsContract.connect(signers.alice).joinGame("Alice");
+    await expect(mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).not.to.be.reverted;
+    await expect(mysteryDoorsContract.connect(signers.alice).makeGuesses(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).to.be.revertedWith("You have already submitted your guesses!");
+
   });
 
   it("Player should be able to decrypt their guesses", async () => {
@@ -381,6 +396,22 @@ describe("MysteryDoors before game start", function () {
       await mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
 
       await expect(mysteryDoorsContract.connect(signers.deployer).startGame()).to.not.be.reverted;
+
+    });
+
+    it("The occupied doors can only be set once", async () => {
+      const occupiedPositions = [24, 23, 22, 17, 12]; // L
+
+      const input = fhevm.createEncryptedInput(mysteryDoorsContractAddress, walletAddress);
+      input.add8(occupiedPositions[0]);
+      input.add8(occupiedPositions[1]);
+      input.add8(occupiedPositions[2]);
+      input.add8(occupiedPositions[3]);
+      input.add8(occupiedPositions[4]);
+      const encryptedInput = await input.encrypt();
+      await mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof);
+      await mysteryDoorsContract.connect(signers.deployer).startGame();
+      await expect(mysteryDoorsContract.markOccupied(encryptedInput.handles[0], encryptedInput.handles[1], encryptedInput.handles[2], encryptedInput.handles[3], encryptedInput.handles[4], encryptedInput.inputProof)).to.be.revertedWith("Occupied doors can only be marked before the game starts!");  
 
     });
 
