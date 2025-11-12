@@ -5,7 +5,7 @@ export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
 
 
 export function getDeploymentHostName(customDomainForProduction: boolean) {
-  const env = process.env.VERCEL_ENV ?? 'development';
+  const env = process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'development';
   // console.log('ENV: ', env);
   let deploymentUrl;
   if (env === 'development') {
@@ -13,9 +13,9 @@ export function getDeploymentHostName(customDomainForProduction: boolean) {
     // if using webhooks proxy tunnels:
     // deploymentUrl = process.env.NGROK_URL ?? 'localhost:3000';
   } else if (env === 'production' && customDomainForProduction) {
-    deploymentUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? '';
+    deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ?? '';
   } else {
-    deploymentUrl = process.env.VERCEL_URL ?? '';
+    deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_URL ?? '';
   }
   console.log('ENV: ', { env, deploymentUrl, vercel: process.env.VERCEL_URL });
 
