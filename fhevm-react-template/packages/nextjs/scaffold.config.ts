@@ -17,7 +17,7 @@ export function getDeploymentHostName(customDomainForProduction: boolean) {
   } else {
     deploymentUrl = process.env.VERCEL_URL ?? '';
   }
-  // console.log('ENV: ', { env, deploymentUrl, vercel: process.env.VERCEL_URL });
+  console.log('ENV: ', { env, deploymentUrl, vercel: process.env.VERCEL_URL });
 
   if (deploymentUrl === '') {
     throw new Error('Deployment URL couldn\'t be determined');
