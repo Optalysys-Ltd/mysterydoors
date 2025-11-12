@@ -68,9 +68,9 @@ export function getDeploymentHostName(customDomainForProduction: boolean) {
   } else if (env === 'production' && customDomainForProduction) {
     deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ?? '';
   } else {
-    deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_URL ?? '';
+    deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? '';
   }
-  console.log('ENV: ', { env, deploymentUrl, vercel: process.env.VERCEL_URL });
+  console.log('ENV: ', { env, deploymentUrl, vercel: process.env.NEXT_PUBLIC_VERCEL_URL });
 
   if (deploymentUrl === '') {
     throw new Error('Deployment URL couldn\'t be determined');
