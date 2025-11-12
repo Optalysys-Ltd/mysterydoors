@@ -2,7 +2,47 @@ import * as chains from "viem/chains";
 import { defineChain } from "viem/utils";
 
 export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
-export const OPTALYSYS_DEV_RPC_URL = "https://rpc.gcp-testnet-eth.dev.optalysys.com";
+
+
+export function getDeploymentHostName(customDomainForProduction: boolean) {
+  const env = process.env.VERCEL_ENV ?? 'development';
+  // console.log('ENV: ', env);
+  let deploymentUrl;
+  if (env === 'development') {
+    deploymentUrl = 'localhost:3000'; // your local hostname and port
+    // if using webhooks proxy tunnels:
+    // deploymentUrl = process.env.NGROK_URL ?? 'localhost:3000';
+  } else if (env === 'production' && customDomainForProduction) {
+    deploymentUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? '';
+  } else {
+    deploymentUrl = process.env.VERCEL_URL ?? '';
+  }
+  // console.log('ENV: ', { env, deploymentUrl, vercel: process.env.VERCEL_URL });
+
+  if (deploymentUrl === '') {
+    throw new Error('Deployment URL couldn\'t be determined');
+  }
+  return deploymentUrl;
+}
+
+
+export function buildUrlPath(urlBase: string, path: string): string {
+  const result = [urlBase, path].map((s) => trimSlash(s)).join('/');
+
+  if (urlBase.startsWith('/')) {
+    return `/${result}`;
+  } else if (urlBase.startsWith('http')) {
+    return result;
+  } else {
+    return `https://${result}`;
+  }
+}
+function trimSlash(s: string): string {
+  // trim leading and trailing slashes
+  return s.replace(/^\/+|\/+$/g, '');
+}
+export const OPTALYSYS_DEV_RPC_URL_PROXY = buildUrlPath(getDeploymentHostName(false), "/rpc");
+
 export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
   id: OPTALYSYS_DEV_CHAIN_ID,
   name: 'Optalysys dev',
@@ -12,7 +52,7 @@ export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
     symbol: 'OPT',
   },
   rpcUrls: {
-    default: { http: [OPTALYSYS_DEV_RPC_URL] },
+    default: { http: [OPTALYSYS_DEV_RPC_URL_PROXY] },
   },
 })
 
@@ -50,7 +90,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
-    [OPTALYSYS_DEV_CHAIN_ID]: OPTALYSYS_DEV_RPC_URL,
+    [OPTALYSYS_DEV_CHAIN_ID]: OPTALYSYS_DEV_RPC_URL_PROXY,
     // Example:
     // [chains.mainnet.id]: "https://mainnet.rpc.buidlguidl.com",
   },
