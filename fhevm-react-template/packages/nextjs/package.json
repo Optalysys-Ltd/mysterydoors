@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "generate-env": "sh ./generate-env.sh",
     "build": "NEXT_PUBLIC_IGNORE_BUILD_ERROR=true next build",
     "check-types": "tsc --noEmit --incremental",
     "dev": "next dev",
