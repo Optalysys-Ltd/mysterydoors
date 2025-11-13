@@ -5,6 +5,8 @@ import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
 import { useFHECounterWagmi } from "~~/hooks/fhecounter-example/useFHECounterWagmi";
+import { getOptalysysRpcUrl } from "~~/scaffold.config";
+import { AllowedChainIds } from "~~/utils/helper";
 
 /*
  * Main FHECounter React component with 3 buttons
@@ -23,8 +25,13 @@ export const FHECounterDemo = () => {
 
   // Create EIP-1193 provider from wagmi for FHEVM
   const provider = useMemo(() => {
-    if (typeof window === "undefined") return undefined;
+    const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
 
+    if (typeof window === "undefined") {
+      return rpcUrl;
+    } if (typeof (window as any).ethereum === "undefined") {
+      return rpcUrl;
+    }
     // Get the wallet provider from window.ethereum
     return (window as any).ethereum;
   }, []);
