@@ -66,6 +66,11 @@ export const MysteryDoors = () => {
     instance: fhevmInstance,
     initialMockChains,
   });
+  const handleJoin = () => {
+  if (!playerName) return;
+  console.log("JOIN CLICKED", playerName);
+  void mysteryDoors.callJoinGame(playerName); // if it returns a Promise
+};
 
   //////////////////////////////////////////////////////////////////////////////
   // UI Stuff:
@@ -167,12 +172,12 @@ export const MysteryDoors = () => {
         <div className="join">
           <div>
             <label className="input input-lg validator join-item">
-              <input className="input-lg" type="text" placeholder="Player name" value={playerName}
+              <input className="input-lg mr-2" type="text" placeholder="Player name" value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)} required />
             </label>
             <div className="validator-hint hidden">Enter your name</div>
           </div>
-          <button disabled={!playerName} onClick={() => mysteryDoors.callJoinGame(playerName)} onTouchEnd={() => mysteryDoors.callJoinGame(playerName)}
+          <button disabled={!playerName || mysteryDoors.isProcessing} onClick={handleJoin} onTouchEnd={handleJoin}
             className="btn btn-lg btn-neutral join-item">Join Game</button>
         </div>
       </div>

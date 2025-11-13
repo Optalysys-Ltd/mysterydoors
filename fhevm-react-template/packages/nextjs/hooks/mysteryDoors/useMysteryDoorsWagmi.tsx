@@ -48,7 +48,7 @@ export const useMysteryDoorsWagmi = (parameters: {
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
 
   // Wagmi + ethers interop
-  const { chainId, accounts, isConnected, ethersReadonlyProvider, ethersSigner } = useWagmiEthers(initialMockChains);
+  const { chainId, accounts, isConnected, ethersReadonlyProvider, ethersSigner, ethersProvider } = useWagmiEthers(initialMockChains);
 
   // Resolve deployed contract info once we know the chain
   const allowedChainId = typeof chainId === "number" ? (chainId as AllowedChainIds) : undefined;
@@ -250,7 +250,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         }
         catch (e) {
           const walletAddress = accounts?.[0] as string;
-          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, chainId as AllowedChainIds);
+          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, ethersProvider, chainId as AllowedChainIds);
           if (revertMsg !== "") {
             setMessage(`${functionName} failed: ${revertMsg}`);
           } else {
@@ -271,6 +271,8 @@ export const useMysteryDoorsWagmi = (parameters: {
     async (playerName: string) => {
       if (isProcessing || !canUpdate || playerName.length === 0) return;
       const functionName = "joinGame";
+      setMessage(`Calling ${functionName}`);
+
       const writeContract = getContract("write");
       if (!writeContract) return setMessage("Contract info or signer not available");
       try {

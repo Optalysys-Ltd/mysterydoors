@@ -1,5 +1,5 @@
 // npm i ethers
-import { BrowserProvider, Contract, Interface } from "ethers";
+import { BrowserProvider, Contract, Interface, JsonRpcProvider } from "ethers";
 import { getParsedErrorWithAllAbis } from "~~/utils/helper/contract";
 import { AllowedChainIds } from "~~/utils/helper/networks";
 
@@ -37,9 +37,9 @@ export async function estimateWithReason(
     fn: string,
     args: any[] = [],
     overrides: Record<string, any> = {},
+    provider: JsonRpcProvider,
     chainId: AllowedChainIds
 ): Promise<{ gas?: bigint; revert?: { kind: "CustomError" | "ErrorString" | "Unknown"; name?: string; args?: any[]; reason?: string; raw?: string } }> {
-    const provider = new BrowserProvider(window.ethereum);
     const iface = buildIface(contract.interface.fragments.filter(f => f.type === "error"));
 
     try {
@@ -105,8 +105,8 @@ function tryDecodeError(iface: Interface, raw: string) {
 }
 
 
-export async function getRevertData(contract: Contract, fn: string, fnArgs: any, sender: string, chainId: AllowedChainIds): string {
-    const res = await estimateWithReason(contract, fn, fnArgs, { from: sender }, chainId);
+export async function getRevertData(contract: Contract, fn: string, fnArgs: any, sender: string, provider: JsonRpcProvider, chainId: AllowedChainIds): string {
+    const res = await estimateWithReason(contract, fn, fnArgs, { from: sender }, provider, chainId);
 
     if (res.gas) {
         return "Estimated gas: " + res.gas.toString();
