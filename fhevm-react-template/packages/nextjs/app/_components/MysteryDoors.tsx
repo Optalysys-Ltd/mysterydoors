@@ -30,21 +30,23 @@ export const MysteryDoors = () => {
 
   // Create EIP-1193 provider from wagmi for FHEVM
   const provider = useMemo(() => {
-    if (typeof window === "undefined") return undefined;
+    if (typeof window === "undefined") {
+      const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+      return rpcUrl;
+    }
 
     // Get the wallet provider from window.ethereum
     return (window as any).ethereum;
   }, []);
 
   const initialMockChains = { 31337: "http://localhost:8545" };
-  const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
 
   const {
     instance: fhevmInstance,
     status: fhevmStatus,
     error: fhevmError,
   } = useFhevm({
-    provider: rpcUrl,
+    provider,
     chainId,
     initialMockChains,
     enabled: true, // use enabled to dynamically create the instance on-demand
