@@ -35,7 +35,7 @@ export const MysteryDoors = () => {
 
     if (typeof window === "undefined") {
       return rpcUrl;
-    } if (window.ethereum === undefined) {
+    } if ((window as any).ethereum === undefined) {
       return rpcUrl;
     }
 
