@@ -65,7 +65,7 @@ export function getDeploymentHostName(customDomainForProduction: boolean) {
     deploymentUrl = 'localhost:3000'; // your local hostname and port
     // if using webhooks proxy tunnels:
     // deploymentUrl = process.env.NGROK_URL ?? 'localhost:3000';
-  } else if (env === 'production' && customDomainForProduction) {
+  } else if (env === 'production') {
     deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ?? '';
   } else {
     deploymentUrl = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? '';

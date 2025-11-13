@@ -178,7 +178,7 @@ export const FHECounterDemo = () => {
       )}
 
       {/* Status Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid xs:grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={sectionClass}>
           <h3 className={titleClass}>🔧 FHEVM Instance</h3>
           <div className="space-y-3">
