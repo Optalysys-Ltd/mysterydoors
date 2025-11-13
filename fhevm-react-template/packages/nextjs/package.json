@@ -43,8 +43,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "~3.2.0",
-    "@material-tailwind/react": "^2.1.10",
     "@tailwindcss/postcss": "4.0.15",
+    "@tailwindcss/typography": "^0.5.19",
     "@trivago/prettier-plugin-sort-imports": "~4.3.0",
     "@types/node": "~18.19.50",
     "@types/react": "~19.0.7",

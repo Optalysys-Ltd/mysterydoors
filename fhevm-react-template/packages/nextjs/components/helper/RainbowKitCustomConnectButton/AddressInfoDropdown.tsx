@@ -34,7 +34,7 @@ export const AddressInfoDropdown = ({ address, ensAvatar, displayName }: Address
   return (
     <>
       <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-        <summary className="btn btn-secondary btn-sm pl-0 pr-2 shadow-md dropdown-toggle gap-0 h-auto!">
+        <summary className="btn btn-secondary btn-xl pl-0 pr-2 shadow-md dropdown-toggle gap-0 h-auto!">
           <BlockieAvatar address={checkSumAddress} size={30} ensImage={ensAvatar} />
           <span className="ml-2 mr-1">{displayName}</span>
           <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
@@ -44,7 +44,7 @@ export const AddressInfoDropdown = ({ address, ensAvatar, displayName }: Address
           {allowedNetworks.length > 1 ? (
             <li className={selectingNetwork ? "hidden" : ""}>
               <button
-                className="h-8 btn-sm rounded-xl! flex gap-3 py-3"
+                className="h-8 btn-xl rounded-xl! flex gap-3 py-3"
                 type="button"
                 onClick={() => {
                   setSelectingNetwork(true);
@@ -56,7 +56,7 @@ export const AddressInfoDropdown = ({ address, ensAvatar, displayName }: Address
           ) : null}
           <li className={selectingNetwork ? "hidden" : ""}>
             <button
-              className="menu-item text-error h-8 btn-sm rounded-xl! flex gap-3 py-3"
+              className="menu-item text-error h-8 btn-xl rounded-xl! flex gap-3 py-3"
               type="button"
               onClick={() => disconnect()}
             >

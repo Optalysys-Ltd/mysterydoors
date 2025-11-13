@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Input, Button } from "@material-tailwind/react";
 import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
@@ -157,27 +156,16 @@ export const MysteryDoors = () => {
               ? "⏳ Processing..."
               : "❌ Cannot submit guesses"}
         </button>
-
-        <div className="relative flex w-full max-w-[24rem]">
-          <Input
-            type="text"
-            label="Player name"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            className="pr-20 text-[#2D2D2D]"
-            containerProps={{
-              className: "min-w-0",
-            }}
-          />
-          <Button
-            size="md"
-            color={playerName ? "gray" : "blue-gray"}
-            disabled={!playerName}
-            className="!absolute right-1 top-1 rounded text-[#2D2D2D]"
-            onClick={() => mysteryDoors.callJoinGame(playerName)}
-          >
-            Join Game
-          </Button>
+        <div className="join">
+          <div>
+            <label className="input validator join-item">
+              <input type="text" placeholder="Player name" value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)} required />
+            </label>
+            <div className="validator-hint hidden">Enter your name</div>
+          </div>
+          <button disabled={!playerName} onClick={() => mysteryDoors.callJoinGame(playerName)}
+            className="btn btn-neutral join-item">Join Game</button>
         </div>
       </div>
 
