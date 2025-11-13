@@ -1,4 +1,6 @@
-import testnetConfigRaw from "../testnet_config.json";
+import testnetDevConfigRaw from "../testnet_config.json";
+import testnetBlueConfigRaw from "../testnet_blue_config.json";
+
 import { FhevmInstanceConfig } from "../fhevmTypes";
 
 
@@ -20,7 +22,8 @@ type TestnetConfig = {
   decryptionContractAddress: string
 }
 
-export function createTestnetFhevmInstanceConfig(): FhevmInstanceConfig {
+export function createTestnetFhevmInstanceConfig(isOptalysysBlue: boolean = false): FhevmInstanceConfig {
+  const testnetConfigRaw = isOptalysysBlue ? testnetBlueConfigRaw : testnetDevConfigRaw;
   const testnetConfig: TestnetConfig = {
     jsonRpcUrl: testnetConfigRaw.json_rpc_url,
     relayerUrl: testnetConfigRaw.relayer_url,
@@ -34,8 +37,8 @@ export function createTestnetFhevmInstanceConfig(): FhevmInstanceConfig {
     decryptionContractAddress: testnetConfigRaw.decryption_contract_address
   };
 
-  const relayerUrl = buildUrlPath(getDeploymentHostName(false), "/api/relayer");
-  const jsonRpcUrl = buildUrlPath(getDeploymentHostName(false), "/rpc");
+  const relayerUrl = buildUrlPath(getDeploymentHostName(false), testnetConfigRaw.relayer_url);
+  const jsonRpcUrl = buildUrlPath(getDeploymentHostName(false), testnetConfigRaw.json_rpc_url);
 
 
   return {
@@ -52,9 +55,13 @@ export function createTestnetFhevmInstanceConfig(): FhevmInstanceConfig {
 }
 
 export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
+export const OPTALYSYS_BLUE_CHAIN_ID = 678259799;
 
 export function isTestnet(chainId: number): boolean {
   return chainId === OPTALYSYS_DEV_CHAIN_ID;
+}
+export function isBlueTestnet(chainId: number): boolean {
+  return chainId === OPTALYSYS_BLUE_CHAIN_ID;
 }
 
 export function getDeploymentHostName(customDomainForProduction: boolean) {

@@ -4,17 +4,26 @@ import path from "path";
 const allowedOrigins = [
   'http://localhost:3000',
   'https://rpc.gcp-testnet-eth.dev.optalysys.com',
-  'https://relayer.gcp-testnet-eth.dev.optalysys.com'
+  'https://relayer.gcp-testnet-eth.dev.optalysys.com',
+  'https://rpc.gcp-testnet-eth.blue.optalysys.com',
+  'https://relayer.gcp-testnet-eth.blue.optalysys.com'
 ];
 
 export function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
-  if (pathname.startsWith('/rpc')) {
+  if (pathname.startsWith('/rpc-blue')) {
+    const path = pathname.replace('/rpc-blue', '');
+    console.log(pathname);
+    const rewriteUrl = new URL(path, 'https://rpc.gcp-testnet-eth.blue.optalysys.com"');
+    return NextResponse.rewrite(rewriteUrl)
+  }
+  else if (pathname.startsWith('/rpc')) {
     const path = pathname.replace('/rpc', '');
-    console.log(path);
+    console.log(pathname);
     const rewriteUrl = new URL(path, 'https://rpc.gcp-testnet-eth.dev.optalysys.com');
     return NextResponse.rewrite(rewriteUrl)
   }
+
   // retrieve the current response
   const res = NextResponse.next()
 
@@ -40,5 +49,5 @@ export function middleware(req: NextRequest) {
 
 // specify the path regex to apply the middleware to
 export const config = {
-  matcher: ['/rpc/:path*'],
+  matcher: ['/rpc/:path*', '/rpc-blue/:path*'],
 }

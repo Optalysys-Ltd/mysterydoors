@@ -2,6 +2,7 @@ import * as chains from "viem/chains";
 import { defineChain } from "viem/utils";
 
 export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
+export const OPTALYSYS_BLUE_CHAIN_ID = 678259799;
 
 
 export function getDeploymentHostName(customDomainForProduction: boolean) {
@@ -42,6 +43,8 @@ function trimSlash(s: string): string {
   return s.replace(/^\/+|\/+$/g, '');
 }
 export const OPTALYSYS_DEV_RPC_URL_PROXY = buildUrlPath(getDeploymentHostName(false), "/rpc");
+export const OPTALYSYS_BLUE_RPC_URL_PROXY = buildUrlPath(getDeploymentHostName(false), "/rpc-blue");
+
 
 export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
   id: OPTALYSYS_DEV_CHAIN_ID,
@@ -55,7 +58,18 @@ export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
     default: { http: [OPTALYSYS_DEV_RPC_URL_PROXY] },
   },
 })
-
+export const optalysys_blue_chain = /*#__PURE__*/ defineChain({
+  id: OPTALYSYS_BLUE_CHAIN_ID,
+  name: 'Optalysys Blue',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Optalysys',
+    symbol: 'OPT',
+  },
+  rpcUrls: {
+    default: { http: [OPTALYSYS_BLUE_RPC_URL_PROXY] },
+  },
+})
 export type BaseConfig = {
   targetNetworks: readonly chains.Chain[];
   pollingInterval: number;
@@ -79,7 +93,7 @@ if (!rawAlchemyKey) {
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat, optalysys_dev_chain, chains.sepolia],
+  targetNetworks: [optalysys_dev_chain, optalysys_blue_chain],
   // The interval at which your front-end polls the RPC servers for new data (it has no effect if you only target the local network (default is 4000))
   pollingInterval: 30000,
   // This is ours Alchemy's default API key.
@@ -91,6 +105,7 @@ const scaffoldConfig = {
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
     [OPTALYSYS_DEV_CHAIN_ID]: OPTALYSYS_DEV_RPC_URL_PROXY,
+    [OPTALYSYS_BLUE_CHAIN_ID]: OPTALYSYS_BLUE_RPC_URL_PROXY,
     // Example:
     // [chains.mainnet.id]: "https://mainnet.rpc.buidlguidl.com",
   },
