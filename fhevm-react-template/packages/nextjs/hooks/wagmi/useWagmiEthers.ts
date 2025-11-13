@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef } from "react";
 import { ethers } from "ethers";
 import { useAccount, useWalletClient } from "wagmi";
+import { getOptalysysRpcUrl } from "~~/scaffold.config";
+import { AllowedChainIds } from "~~/utils/helper";
 
 export const useWagmiEthers = (initialMockChains?: Readonly<Record<number, string>>) => {
   const { address, isConnected, chain } = useAccount();
@@ -11,8 +13,17 @@ export const useWagmiEthers = (initialMockChains?: Readonly<Record<number, strin
   const chainId = chain?.id ?? walletClient?.chain?.id;
   const accounts = address ? [address] : undefined;
 
+  const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+  const rpcProvider = new ethers.JsonRpcProvider(rpcUrl);
+
   const ethersProvider = useMemo(() => {
     if (!walletClient) return undefined;
+
+    if (typeof window === "undefined") {
+      return rpcProvider;
+    } if (typeof (window as any).ethereum === "undefined") {
+      return rpcProvider;
+    }
 
     const eip1193Provider = {
       request: async (args: any) => {
