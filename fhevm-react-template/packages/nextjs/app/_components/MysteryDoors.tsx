@@ -7,6 +7,8 @@ import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCu
 import { useMysteryDoorsWagmi } from "~~/hooks/mysteryDoors/useMysteryDoorsWagmi";
 import { MysteryDoorsGridMeasured } from "~~/app/_components/MysteryDoorsGrid";
 import { useMysteryDoorsSelection } from "~~/hooks/mysteryDoors/useMysteryDoorsSelection";
+import { getOptalysysRpcUrl } from "~~/scaffold.config";
+import { AllowedChainIds } from "~~/utils/helper";
 
 /*
  * Main FHECounter React component with 3 buttons
@@ -28,7 +30,10 @@ export const MysteryDoors = () => {
 
   // Create EIP-1193 provider from wagmi for FHEVM
   const provider = useMemo(() => {
-    if (typeof window === "undefined") return undefined;
+    if (typeof window === "undefined") {
+      const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+      return rpcUrl;
+    }
 
     // Get the wallet provider from window.ethereum
     return (window as any).ethereum;

@@ -1,5 +1,6 @@
 import * as chains from "viem/chains";
 import { defineChain } from "viem/utils";
+import { AllowedChainIds } from "~~/utils/helper";
 
 export const OPTALYSYS_DEV_CHAIN_ID = 678259798;
 export const OPTALYSYS_BLUE_CHAIN_ID = 678259799;
@@ -45,6 +46,10 @@ function trimSlash(s: string): string {
 export const OPTALYSYS_DEV_RPC_URL_PROXY = buildUrlPath(getDeploymentHostName(false), "/rpc");
 export const OPTALYSYS_BLUE_RPC_URL_PROXY = buildUrlPath(getDeploymentHostName(false), "/rpc-blue");
 
+export function getOptalysysRpcUrl (chainId: AllowedChainIds): string {
+  if (chainId === OPTALYSYS_BLUE_CHAIN_ID) return OPTALYSYS_BLUE_RPC_URL_PROXY;
+  else return OPTALYSYS_DEV_RPC_URL_PROXY;
+}
 
 export const optalysys_dev_chain = /*#__PURE__*/ defineChain({
   id: OPTALYSYS_DEV_CHAIN_ID,

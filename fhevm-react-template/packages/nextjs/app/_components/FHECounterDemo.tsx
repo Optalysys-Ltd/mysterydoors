@@ -5,6 +5,8 @@ import { useFhevm } from "@fhevm-sdk";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCustomConnectButton";
 import { useFHECounterWagmi } from "~~/hooks/fhecounter-example/useFHECounterWagmi";
+import { getOptalysysRpcUrl } from "~~/scaffold.config";
+import { AllowedChainIds } from "~~/utils/helper";
 
 /*
  * Main FHECounter React component with 3 buttons
@@ -23,8 +25,10 @@ export const FHECounterDemo = () => {
 
   // Create EIP-1193 provider from wagmi for FHEVM
   const provider = useMemo(() => {
-    if (typeof window === "undefined") return undefined;
-
+    if (typeof window === "undefined") {
+      const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+      return rpcUrl;
+    }
     // Get the wallet provider from window.ethereum
     return (window as any).ethereum;
   }, []);
@@ -237,11 +241,10 @@ function printBooleanProperty(name: string, value: boolean) {
     <div className="flex justify-between items-center py-2 px-3  bg-white border border-gray-200 w-full">
       <span className="text-gray-700 font-medium">{name}</span>
       <span
-        className={`font-mono text-sm font-semibold px-2 py-1 border ${
-          value
+        className={`font-mono text-sm font-semibold px-2 py-1 border ${value
             ? "text-green-800 bg-green-100 border-green-300"
             : "text-red-800 bg-red-100 border-red-300"
-        }`}
+          }`}
       >
         {value ? "✓ true" : "✗ false"}
       </span>
