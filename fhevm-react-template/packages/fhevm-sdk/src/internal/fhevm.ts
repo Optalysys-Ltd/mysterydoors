@@ -313,9 +313,11 @@ export const createFhevmInstance = async (parameters: {
     publicParams: pub.publicParams,
   };
 
-  if (isOptalysysDev) {
+  if (isOptalysysDev || isOptalysysBlue) {
     const optalysysConfig: FhevmInstanceConfig = {
-      ...testnetConfig, publicKey: pub.publicKey,
+      ...testnetConfig,
+      network: testnetConfig.network,
+      publicKey: pub.publicKey,
       publicParams: pub.publicParams,
     };
     config = optalysysConfig;
