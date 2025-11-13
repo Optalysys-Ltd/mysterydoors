@@ -33,7 +33,9 @@ export const MysteryDoors = () => {
     const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
     console.log(window?.ethereum);
 
-    if (typeof window === "undefined" || window.ethereum === undefined) {
+    if (typeof window === "undefined") {
+      return rpcUrl;
+    } if (window.ethereum === undefined) {
       return rpcUrl;
     }
 
