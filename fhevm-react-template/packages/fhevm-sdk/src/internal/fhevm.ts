@@ -8,7 +8,7 @@ import type {
 import { isFhevmWindowType, RelayerSDKLoader } from "./RelayerSDKLoader";
 import { publicKeyStorageGet, publicKeyStorageSet } from "./PublicKeyStorage";
 import { FhevmInstance, FhevmInstanceConfig } from "../fhevmTypes";
-import { createTestnetFhevmInstanceConfig, isTestnet } from "./constants";
+import { createTestnetFhevmInstanceConfig, isBlueTestnet, isTestnet } from "./constants";
 
 export class FhevmReactError extends Error {
   code: string;
@@ -287,12 +287,15 @@ export const createFhevmInstance = async (parameters: {
   const relayerSDK = (window as unknown as FhevmWindowType).relayerSDK;
   let aclAddress = relayerSDK.SepoliaConfig.aclContractAddress;
 
-  const testnetConfig = createTestnetFhevmInstanceConfig();
+  const isOptalysysDev = isTestnet(chainId);
+  const isOptalysysBlue = isBlueTestnet(chainId);
+  console.log(`isOptalysysDev: ${isOptalysysDev}, isOptalysysBlue: ${isOptalysysBlue}`);
+
+  const testnetConfig = createTestnetFhevmInstanceConfig(isOptalysysBlue);
   console.log(testnetConfig);
 
-  const isOptalysysDev = isTestnet(chainId);
-  console.log(`isOptalysysDev: ${isOptalysysDev}`);
-  if (isOptalysysDev) {
+
+  if (isOptalysysDev || isOptalysysBlue) {
     aclAddress = testnetConfig.aclContractAddress;
   }
 

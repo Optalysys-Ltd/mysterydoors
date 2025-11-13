@@ -116,7 +116,7 @@ export const MysteryDoors = () => {
 
 
   return (
-    <div className="max-w-6xl mx-auto text-gray-900">
+    <div className="max-w-6xl mx-auto text-gray-900 overflow-y-scroll snap-mandatory h-screen">
       {/* Header */}
       <div className="text-center mb-8 text-black p-6 space-y-6">
         <h1 className="text-3xl font-bold mb-2">Mystery Doors</h1>
@@ -129,7 +129,7 @@ export const MysteryDoors = () => {
 
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-black p-6 space-y-6">
+      <div className="snap-start grid grid-cols-1 md:grid-cols-3 gap-4 text-black p-6 space-y-6">
 
         <button
           className={mysteryDoors.isGuessesDecrypted ? successButtonClass : primaryButtonClass}

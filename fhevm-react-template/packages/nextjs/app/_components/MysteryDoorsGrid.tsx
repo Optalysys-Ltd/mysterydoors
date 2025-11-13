@@ -44,7 +44,7 @@ export function MysteryDoorsGridMeasured({
 
   return (
     <div
-      className={`relative mx-auto rounded-2xl shadow-lg overflow-hidden mystery-doors-container ${className}`}
+      className={`snap-start relative mx-auto rounded-2xl shadow-lg overflow-hidden mystery-doors-container ${className}`}
       aria-label="Las Puertas del Misterio 5×5 measured grid"
     >
       {/* 1px-ish lines via gap over a dark backdrop */}
