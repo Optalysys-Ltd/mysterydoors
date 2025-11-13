@@ -30,8 +30,10 @@ export const MysteryDoors = () => {
 
   // Create EIP-1193 provider from wagmi for FHEVM
   const provider = useMemo(() => {
-    if (typeof window === "undefined") {
-      const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+    const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+    console.log(window?.ethereum);
+
+    if (typeof window === "undefined" || window.ethereum === undefined) {
       return rpcUrl;
     }
 

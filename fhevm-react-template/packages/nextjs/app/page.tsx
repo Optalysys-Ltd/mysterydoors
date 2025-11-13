@@ -32,6 +32,8 @@ export default function Home() {
         <p>Switch wallets to the newly-imported wallet. Connect your wallet to the Mystery Doors dApp</p>
         <img src="./instructions/metamask_connect_account.png" alt="Metamask connect account to Mystery Doors dApp" className="max-w-lg w-xs sm:w-sm md:w-md lg:w-lg" />
 
+<p>Switch network to Optalysys dev or Optalysys Blue.</p>
+<p>Note: In the event of multiple entries by the same wallet, the entry submitted on Optalysys Blue will be the wallet's <em>definitive</em> submission.</p>
       </div>
     </div>
   );
