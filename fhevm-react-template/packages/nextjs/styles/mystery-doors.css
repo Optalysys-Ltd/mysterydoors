@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* -------- base / mobile-first (smallest) -------- */
+  .mystery-doors-container {
+    @apply relative mx-auto bg-[#e4ded7];
+    width: 320px;
+    height: 480px;
+    padding: 69px 9px 63px 19px; /* top right bottom left */
+    background-image: url("/mysterydoors3.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 320px 480px;
+  }
+
+  .mystery-doors-grid {
+    @apply grid;
+    grid-template-columns: repeat(5, 50px);
+    grid-template-rows: repeat(5, 70px);
+    row-gap: 9px;
+    column-gap: 7px;
+  }
+
+  .mystery-cell {
+    @apply flex items-center justify-center;
+    width: 50px;
+    height: 70px;
+  }
+
+  /* ---------------- sm (≈60% scale) ---------------- */
+  @media (width >= 40rem) {
+    .mystery-doors-container {
+      width: 615px;
+      height: 922px;
+      padding: 132px 18px 120px 36px;
+      background-size: 615px 922px;
+    }
+
+    .mystery-doors-grid {
+      grid-template-columns: repeat(5, 96px);
+      grid-template-rows: repeat(5, 134px);
+      row-gap: 18px;
+      column-gap: 14px;
+    }
+
+    .mystery-cell {
+      width: 96px;
+      height: 134px;
+    }
+  }
+
+  /* ---------------- lg (≈85% scale) ---------------- */
+  @media (width >= 64rem) {
+    .mystery-doors-container {
+      width: 870px;
+      height: 1305px;
+      padding: 187px 26px 170px 51px;
+      background-size: 870px 1305px;
+    }
+
+    .mystery-doors-grid {
+      grid-template-columns: repeat(5, 136px);
+      grid-template-rows: repeat(5, 190px);
+      row-gap: 26px;
+      column-gap: 20px;
+    }
+
+    .mystery-cell {
+      width: 136px;
+      height: 190px;
+    }
+  }
+
+  /* ------------- xl (original 1024×1536) ----------- */
+  @media (width >= 80rem) {
+    .mystery-doors-container {
+      width: 1024px;
+      height: 1536px;
+      padding: 220px 30px 200px 60px;
+      background-size: 1024px 1536px;
+    }
+
+    .mystery-doors-grid {
+      grid-template-columns: repeat(5, 160px);
+      grid-template-rows: repeat(5, 224px);
+      row-gap: 30px;
+      column-gap: 24px;
+    }
+
+    .mystery-cell {
+      width: 160px;
+      height: 224px;
+    }
+  }
+}

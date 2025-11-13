@@ -1,3 +1,4 @@
+import "~~/styles/mystery-doors.css";
 import React from "react";
 
 /**
@@ -43,28 +44,12 @@ export function MysteryDoorsGridMeasured({
 
   return (
     <div
-      className={`relative mx-auto rounded-2xl shadow-lg overflow-hidden ${className}`}
-      style={{
-        width: CANVAS_W,
-        height: CANVAS_H,
-        backgroundColor: "rgb(228, 222, 215)",
-        backgroundImage: `url("${bgUrl}")`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        backgroundSize: `${CANVAS_W}px ${CANVAS_H}px`, // exact fit
-        //boxSizing: "border-box",
-        padding: `220px 60px 200px 60px`,
-      }}
+      className={`relative mx-auto rounded-2xl shadow-lg overflow-hidden mystery-doors-container ${className}`}
       aria-label="Las Puertas del Misterio 5×5 measured grid"
     >
       {/* 1px-ish lines via gap over a dark backdrop */}
       <div
-        className="h-full w-full grid"
-        style={{
-          gridTemplateColumns: `repeat(5, ${CELL_W}px)`,
-          gridTemplateRows: `repeat(5, ${CELL_H}px)`,
-          gap: `30px 24px`,
-        }}
+        className="h-full w-full grid mystery-doors-grid"
       >
         {cells.map((n, i) => {
           const active = isSelected(n);
@@ -75,15 +60,11 @@ export function MysteryDoorsGridMeasured({
               tabIndex={0}
               aria-label={`Door cell ${n}`}
               onClick={() => handleActivate(n)}
-              className={`flex items-center justify-center
+              className={`mystery-cell flex items-center justify-center
                        select-none cursor-pointer transition-transform duration-150
                        hover:scale-[1.03] active:scale-[0.98] rounded-lg  ${active ? "bg-emerald-400/40 text-white shadow-lg scale-105"
                   : "bg-red-100/40 hover:bg-white text-gray-800"
                 }`}
-              style={{
-                width: CELL_W,
-                height: CELL_H,
-              }}
             >
               <span className="text-neutral-900/90 font-semibold text-xl drop-shadow-[0_1px_0_rgba(255,255,255,0.6)]">
                 {n}

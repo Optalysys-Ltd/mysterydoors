@@ -116,11 +116,11 @@ export const MysteryDoors = () => {
 
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6 text-gray-900">
+    <div className="max-w-6xl mx-auto text-gray-900">
       {/* Header */}
-      <div className="text-center mb-8 text-black">
+      <div className="text-center mb-8 text-black p-6 space-y-6">
         <h1 className="text-3xl font-bold mb-2">Mystery Doors</h1>
-        <p className="text-gray-600">Interact with the Fully Homomorphic Encryption Mystery Doors contract</p>
+        <p className="text-gray-600">Interact with the Fully Homomorphic Encryption Mystery Doors contract. Scroll down for debugging information.</p>
       </div>
 
 
@@ -129,7 +129,7 @@ export const MysteryDoors = () => {
 
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-black">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-black p-6 space-y-6">
 
         <button
           className={mysteryDoors.isGuessesDecrypted ? successButtonClass : primaryButtonClass}
@@ -158,14 +158,14 @@ export const MysteryDoors = () => {
         </button>
         <div className="join">
           <div>
-            <label className="input validator join-item">
-              <input type="text" placeholder="Player name" value={playerName}
+            <label className="input input-lg validator join-item">
+              <input className="input-lg" type="text" placeholder="Player name" value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)} required />
             </label>
             <div className="validator-hint hidden">Enter your name</div>
           </div>
           <button disabled={!playerName} onClick={() => mysteryDoors.callJoinGame(playerName)}
-            className="btn btn-neutral join-item">Join Game</button>
+            className="btn btn-lg btn-neutral join-item">Join Game</button>
         </div>
       </div>
 

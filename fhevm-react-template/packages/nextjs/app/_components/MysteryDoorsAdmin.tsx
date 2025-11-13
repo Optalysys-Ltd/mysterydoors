@@ -126,7 +126,7 @@ export const MysteryDoorsAdmin = () => {
 
 
       {/* Game grid */}
-      <MysteryDoorsGridMeasured bgUrl={"/mysterydoors3.png"} onCellClick={(i) => toggleDoor(i)} isSelected={(i) => isSelected(i)} />
+      <MysteryDoorsGridMeasured bgUrl={"/mysterydoors.png"} onCellClick={(i) => toggleDoor(i)} isSelected={(i) => isSelected(i)} />
 
 
       {/* Action Buttons */}
