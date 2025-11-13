@@ -19,13 +19,6 @@ export const useWagmiEthers = (initialMockChains?: Readonly<Record<number, strin
   const ethersProvider = useMemo(() => {
     if (!walletClient) return undefined;
 
-    if (typeof window === "undefined") {
-      return rpcProvider;
-    } if (typeof (window as any).ethereum === "undefined") {
-      return rpcProvider;
-    }
-    return rpcProvider;
-/*
     const eip1193Provider = {
       request: async (args: any) => {
         return await walletClient.request(args);
@@ -38,7 +31,7 @@ export const useWagmiEthers = (initialMockChains?: Readonly<Record<number, strin
       },
     } as ethers.Eip1193Provider;
 
-    return new ethers.BrowserProvider(eip1193Provider); */
+    return new ethers.BrowserProvider(eip1193Provider);
   }, [walletClient]);
 
   const ethersReadonlyProvider = useMemo(() => {

@@ -72,6 +72,7 @@ export const useMysteryDoorsWagmi = (parameters: {
   const getContract = (mode: "read" | "write") => {
     if (!hasContract) return undefined;
     const providerOrSigner = mode === "read" ? ethersReadonlyProvider : ethersSigner;
+    console.log(providerOrSigner);
     if (!providerOrSigner) return undefined;
     return new ethers.Contract(
       mysteryDoors!.address,
@@ -281,6 +282,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         await tx.wait();
         setMessage(`${functionName}(${playerName}) completed!`);
       } catch (e) {
+        console.log(e);
         const walletAddress = accounts?.[0] as string;
         const revertMsg = await getRevertData(writeContract, functionName, [playerName], walletAddress, ethersProvider as JsonRpcProvider, chainId as AllowedChainIds);
         if (revertMsg !== "") {
