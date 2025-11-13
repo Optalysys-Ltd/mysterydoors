@@ -177,7 +177,7 @@ export const MysteryDoors = () => {
             </label>
             <div className="validator-hint hidden">Enter your name</div>
           </div>
-          <button disabled={!playerName || mysteryDoors.isProcessing} onClick={handleJoin} onTouchEnd={handleJoin}
+          <button disabled={!playerName || mysteryDoors.isProcessing} onClick={handleJoin}
             className="btn btn-lg btn-neutral join-item">Join Game</button>
         </div>
       </div>
