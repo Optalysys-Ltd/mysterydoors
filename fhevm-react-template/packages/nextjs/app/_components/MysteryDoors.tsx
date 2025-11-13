@@ -175,7 +175,7 @@ export const MysteryDoors = () => {
         mysteryDoors.message && (
           <div className={sectionClass}>
             <h3 className={titleClass}>💬 Messages</h3>
-            <div className="border bg-white border-gray-200 p-4">
+            <div className="border bg-white border-gray-200 p-4 overflow-x-scroll max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
               <p className="text-gray-800">{mysteryDoors.message}</p>
             </div>
           </div>

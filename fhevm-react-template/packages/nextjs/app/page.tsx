@@ -11,26 +11,26 @@ export default function Home() {
         <h3>Add Optalysys network to MetaMask</h3>
         <p>Add the networks to MetaMask using these values:</p>
         <h4>CPU testnet</h4>
-        <div>JSON RPC URL: <pre>https://rpc.gcp-testnet-eth.dev.optalysys.com</pre></div>
-        <div>Chain ID: <pre>678259798</pre></div>
+        <div>JSON RPC URL: <code>https://rpc.gcp-testnet-eth.dev.optalysys.com</code></div>
+        <div>Chain ID: <code>678259798</code></div>
 
         <h4>Blue (FPGA-accelerated) testnet</h4>
-        <div>JSON RPC URL: <pre>https://rpc.gcp-testnet-eth.blue.optalysys.com/</pre></div>
-        <div>Chain ID: <pre>678259799</pre></div>
+        <div>JSON RPC URL: <code>https://rpc.gcp-testnet-eth.blue.optalysys.com/</code></div>
+        <div>Chain ID: <code>678259799</code></div>
 
-        <img src="./instructions/metamask_add_network.png" alt="Add network to Metamask" className="max-w-lg" />
+        <img src="./instructions/metamask_add_network.png" alt="Add network to Metamask" className="max-w-lg w-xs sm:w-sm md:w-md lg:w-lg" />
 
         <h3>Add account by importing the private key</h3>
         <p>Choose Add Account and import the Optalysys private key by scanning the QR code or typing it in.</p>
-        <img src="./instructions/metamask_add_account.png" alt="Add account to Metamask" className="max-w-lg" />
-        <img src="./instructions/metamask_import_account.png" alt="Import account to Metamask" className="max-w-lg" />
-        <img src="./instructions/metamask_import_private_key.png" alt="Import private key to Metamask" className="max-w-lg" />
+        <img src="./instructions/metamask_add_account.png" alt="Add account to Metamask" className="max-w-lg w-xs sm:w-sm md:w-md lg:w-lg" />
+        <img src="./instructions/metamask_import_account.png" alt="Import account to Metamask" className="max-w-lg w-xs sm:w-sm md:w-md lg:w-lg" />
+        <img src="./instructions/metamask_import_private_key.png" alt="Import private key to Metamask" className="max-w-lg w-xs sm:w-sm md:w-md lg:w-lg" />
 
         <h2>Go to the Mystery Doors dApp</h2>
         <p>Open the link below to access the Mystery Doors dApp</p>
         <p><Link href="/mysterydoors"><button className="btn btn-lg btn-primary">MysteryDoors</button></Link></p>
         <p>Switch wallets to the newly-imported wallet. Connect your wallet to the Mystery Doors dApp</p>
-        <img src="./instructions/metamask_connect_account.png" alt="Metamask connect account to Mystery Doors dApp" className="max-w-lg" />
+        <img src="./instructions/metamask_connect_account.png" alt="Metamask connect account to Mystery Doors dApp" className="max-w-lg w-xs sm:w-sm md:w-md lg:w-lg" />
 
       </div>
     </div>
