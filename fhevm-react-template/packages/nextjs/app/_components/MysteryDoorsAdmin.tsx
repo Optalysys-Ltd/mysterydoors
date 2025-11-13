@@ -105,7 +105,7 @@ export const MysteryDoorsAdmin = () => {
               </span>
             </div>
             <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Wallet not connected</h2>
-            <p className="text-gray-700 mb-6">Connect your wallet to use the FHE Counter demo.</p>
+            <p className="text-gray-700 mb-6">Connect your wallet to use Mystery Doors admin</p>
             <div className="flex items-center justify-center">
               <RainbowKitCustomConnectButton />
             </div>
