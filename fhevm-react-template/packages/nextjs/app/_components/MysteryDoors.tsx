@@ -7,6 +7,8 @@ import { RainbowKitCustomConnectButton } from "~~/components/helper/RainbowKitCu
 import { useMysteryDoorsWagmi } from "~~/hooks/mysteryDoors/useMysteryDoorsWagmi";
 import { MysteryDoorsGridMeasured } from "~~/app/_components/MysteryDoorsGrid";
 import { useMysteryDoorsSelection } from "~~/hooks/mysteryDoors/useMysteryDoorsSelection";
+import { getOptalysysRpcUrl } from "~~/scaffold.config";
+import { AllowedChainIds } from "~~/utils/helper";
 
 /*
  * Main FHECounter React component with 3 buttons
@@ -35,13 +37,14 @@ export const MysteryDoors = () => {
   }, []);
 
   const initialMockChains = { 31337: "http://localhost:8545" };
+  const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
 
   const {
     instance: fhevmInstance,
     status: fhevmStatus,
     error: fhevmError,
   } = useFhevm({
-    provider,
+    provider: rpcUrl,
     chainId,
     initialMockChains,
     enabled: true, // use enabled to dynamically create the instance on-demand
