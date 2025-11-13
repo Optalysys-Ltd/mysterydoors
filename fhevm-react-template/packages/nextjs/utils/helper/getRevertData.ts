@@ -1,5 +1,5 @@
 // npm i ethers
-import { BrowserProvider, Contract, Interface, JsonRpcProvider } from "ethers";
+import { Contract, Interface, JsonRpcProvider } from "ethers";
 import { getParsedErrorWithAllAbis } from "~~/utils/helper/contract";
 import { AllowedChainIds } from "~~/utils/helper/networks";
 

@@ -12,7 +12,7 @@ import {
   useFHEEncryption,
   useInMemoryStorage,
 } from "@fhevm-sdk";
-import { ethers } from "ethers";
+import { ethers, JsonRpcProvider } from "ethers";
 import { getParsedErrorWithAllAbis, type Contract } from "~~/utils/helper/contract";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
 import { useReadContract } from "wagmi";
@@ -250,7 +250,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         }
         catch (e) {
           const walletAddress = accounts?.[0] as string;
-          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, ethersProvider, chainId as AllowedChainIds);
+          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, ethersProvider as JsonRpcProvider, chainId as AllowedChainIds);
           if (revertMsg !== "") {
             setMessage(`${functionName} failed: ${revertMsg}`);
           } else {
@@ -282,7 +282,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         setMessage(`${functionName}(${playerName}) completed!`);
       } catch (e) {
         const walletAddress = accounts?.[0] as string;
-        const revertMsg = await getRevertData(writeContract, functionName, [playerName], walletAddress, chainId as AllowedChainIds);
+        const revertMsg = await getRevertData(writeContract, functionName, [playerName], walletAddress, ethersProvider as JsonRpcProvider, chainId as AllowedChainIds);
         if (revertMsg !== "") {
           setMessage(`${functionName} failed: ${revertMsg}`);
         } else {
