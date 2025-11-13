@@ -13,10 +13,11 @@ import {
   useInMemoryStorage,
 } from "@fhevm-sdk";
 import { ethers } from "ethers";
-import type { Contract } from "~~/utils/helper/contract";
+import { getParsedErrorWithAllAbis, type Contract } from "~~/utils/helper/contract";
 import type { AllowedChainIds } from "~~/utils/helper/networks";
 import { useReadContract } from "wagmi";
 import { MysteryDoors__factory } from "~~/typechain-types";
+import { getRevertData } from "~~/utils/helper/getRevertData";
 
 type ClearGuess = {
   handle: string;
@@ -225,7 +226,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         const { methods, error } = getEncryptionMethodFor(functionName);
         if (!methods) return setMessage(error ?? "Encryption method not found");
 
-        setMessage(`Encrypting with ${methods.join(", ")}...`);
+        setMessage(`Encrypting inputs with ${methods.join(", ")}...`);
         const enc = await encryptWith(builder => {
           const chained = methods.reduce((acc: RelayerEncryptedInput, method: string, index: number,) => {
             return (acc as any)[method](guesses[index]);
@@ -240,11 +241,23 @@ export const useMysteryDoorsWagmi = (parameters: {
 
         const params = buildParamsFromAbi(enc, [...mysteryDoors!.abi] as any[], functionName);
         console.log(params);
-        const tx = await (writeContract.makeGuesses(...params));
-        setMessage("Waiting for transaction...");
-        await tx.wait();
-        setMessage(`${functionName}(${encSig}) completed!`);
-        refreshGuessesHandle();
+        try {
+          const tx = await (writeContract.makeGuesses(...params));
+          setMessage("Waiting for transaction...");
+          await tx.wait();
+          setMessage(`${functionName}(${encSig}) completed!`);
+          refreshGuessesHandle();
+        }
+        catch (e) {
+          const walletAddress = accounts?.[0] as string;
+          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, chainId as AllowedChainIds);
+          if (revertMsg !== "") {
+            setMessage(`${functionName} failed: ${revertMsg}`);
+          } else {
+            setMessage(`${functionName} failed: ${e instanceof Error ? e.message : String(e)}`);
+          }
+
+        }
       } catch (e) {
         setMessage(`${functionName} failed: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
@@ -258,16 +271,22 @@ export const useMysteryDoorsWagmi = (parameters: {
     async (playerName: string) => {
       if (isProcessing || !canUpdate || playerName.length === 0) return;
       const functionName = "joinGame";
+      const writeContract = getContract("write");
+      if (!writeContract) return setMessage("Contract info or signer not available");
       try {
-        const writeContract = getContract("write");
-        if (!writeContract) return setMessage("Contract info or signer not available");
-
         const tx = await writeContract.joinGame(playerName);
         setMessage("Waiting for transaction...");
         await tx.wait();
         setMessage(`${functionName}(${playerName}) completed!`);
       } catch (e) {
-        setMessage(`${functionName} failed: ${e instanceof Error ? e.message : String(e)}`);
+        const walletAddress = accounts?.[0] as string;
+        const revertMsg = await getRevertData(writeContract, functionName, [playerName], walletAddress, chainId as AllowedChainIds);
+        if (revertMsg !== "") {
+          setMessage(`${functionName} failed: ${revertMsg}`);
+        } else {
+          setMessage(`${functionName} failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
+
       } finally {
         setIsProcessing(false);
       }
