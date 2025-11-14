@@ -1,0 +1,9 @@
+key.json
+node_modules
+encrypted_input.json
+encrypted_sum_inputs.json
+test_contract.address
+fhevmTemp
+artifacts
+cache
+.pnpm-store

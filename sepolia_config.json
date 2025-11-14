@@ -1,0 +1,12 @@
+{
+    "gateway_chain_id": "55815",
+    "input_verification_contract_address": "0x7048C39f048125eDa9d678AEbaDfB22F7900a29F",
+    "decryption_contract_address": "0xb6E160B1ff80D67Bfe90A85eE06Ce0A2613607D1",
+    "acl_contract_address": "0x687820221192C5B662b25367F70076A37bc79b6c",
+    "fhevm_executor_contract_address": "0x848B0066793BcC60346Da1F49049357399B8D595",
+    "kms_verifier_contract_address": "0x1364cBBf2cDF5032C47d8226a6f6FBD2AFCDacAC",
+    "decryption_oracle_contract_address": "0xa02Cda4Ca3a71D7C46997716F4283aa851C28812",
+    "input_verifier_contract_address": "0xbc91f3daD1A5F19F8390c400196e58073B6a0BC4",
+    "json_rpc_url": "https://eth-sepolia.g.alchemy.com/v2/LWjLJm6LBD7GU6ImBMW5SPnuh54C7eLJ",
+    "relayer_url": "https://relayer.testnet.zama.cloud"
+}
