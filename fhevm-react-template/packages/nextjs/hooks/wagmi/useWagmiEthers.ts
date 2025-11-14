@@ -13,9 +13,12 @@ export const useWagmiEthers = (initialMockChains?: Readonly<Record<number, strin
   const chainId = chain?.id ?? walletClient?.chain?.id;
   const accounts = address ? [address] : undefined;
 
-  const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
-  const rpcProvider = new ethers.JsonRpcProvider(rpcUrl);
-
+  const rpcProvider = useMemo(() => {
+    const rpcUrl = getOptalysysRpcUrl(chainId as AllowedChainIds);
+    const rpcProvider = new ethers.JsonRpcProvider(rpcUrl);
+    return rpcProvider;
+  }, [chainId]);
+  
   const ethersProvider = useMemo(() => {
     if (!walletClient) return undefined;
 
@@ -69,6 +72,7 @@ export const useWagmiEthers = (initialMockChains?: Readonly<Record<number, strin
     ethersProvider,
     ethersReadonlyProvider,
     ethersSigner,
+    rpcProvider,
     ropRef,
     chainIdRef,
   } as const;

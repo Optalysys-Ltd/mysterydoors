@@ -48,7 +48,7 @@ export const useMysteryDoorsWagmi = (parameters: {
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
 
   // Wagmi + ethers interop
-  const { chainId, accounts, isConnected, ethersReadonlyProvider, ethersSigner, ethersProvider } = useWagmiEthers(initialMockChains);
+  const { chainId, accounts, isConnected, ethersReadonlyProvider, ethersSigner, ethersProvider, rpcProvider } = useWagmiEthers(initialMockChains);
 
   // Resolve deployed contract info once we know the chain
   const allowedChainId = typeof chainId === "number" ? (chainId as AllowedChainIds) : undefined;
@@ -251,7 +251,7 @@ export const useMysteryDoorsWagmi = (parameters: {
         }
         catch (e) {
           const walletAddress = accounts?.[0] as string;
-          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, ethersProvider as JsonRpcProvider, chainId as AllowedChainIds);
+          const revertMsg = await getRevertData(writeContract, functionName, params, walletAddress, rpcProvider, chainId as AllowedChainIds);
           if (revertMsg !== "") {
             setMessage(`${functionName} failed: ${revertMsg}`);
           } else {
@@ -284,7 +284,7 @@ export const useMysteryDoorsWagmi = (parameters: {
       } catch (e) {
         console.log(e);
         const walletAddress = accounts?.[0] as string;
-        const revertMsg = await getRevertData(writeContract, functionName, [playerName], walletAddress, ethersProvider as JsonRpcProvider, chainId as AllowedChainIds);
+        const revertMsg = await getRevertData(writeContract, functionName, [playerName], walletAddress, rpcProvider, chainId as AllowedChainIds);
         if (revertMsg !== "") {
           setMessage(`${functionName} failed: ${revertMsg}`);
         } else {

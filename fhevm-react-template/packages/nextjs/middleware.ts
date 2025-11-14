@@ -13,13 +13,12 @@ export function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
   if (pathname.startsWith('/rpc-blue')) {
     const path = pathname.replace('/rpc-blue', '');
-    console.log(pathname);
-    const rewriteUrl = new URL(path, 'https://rpc.gcp-testnet-eth.blue.optalysys.com"');
+    const rewriteUrl = new URL(path, 'https://rpc.gcp-testnet-eth.blue.optalysys.com');
+    console.log(rewriteUrl);
     return NextResponse.rewrite(rewriteUrl)
   }
   else if (pathname.startsWith('/rpc')) {
     const path = pathname.replace('/rpc', '');
-    console.log(pathname);
     const rewriteUrl = new URL(path, 'https://rpc.gcp-testnet-eth.dev.optalysys.com');
     return NextResponse.rewrite(rewriteUrl)
   }
